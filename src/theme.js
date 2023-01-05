@@ -109,4 +109,4 @@ export const themeSettings = {
   },
 };
 
-export const theme = createTheme(themeSettings, []);
+export const theme = createTheme(themeSettings, []); //useMemo. How to integrate? Doesnt recognize hook
