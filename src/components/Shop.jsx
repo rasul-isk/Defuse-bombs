@@ -3,11 +3,13 @@ import React from 'react';
 import { colors } from '../theme';
 import HeaderTitle from './HeaderTitle';
 
-export const Game = ({ play, difficulty, setTimer }) => {
-  setTimer('00:01');
+const Shop = ({ setAbilities, difficulty }) => {
+  if (difficulty === 'Crazy') setAbilities('none');
   return (
     <Box className="container-item" bgcolor={colors.red[500]} display="block">
-      <HeaderTitle title={play === 'started' ? 'Game Started!' : 'Game Paused'} />
+      <HeaderTitle title="Buy Abilities!" />
     </Box>
   );
 };
+
+export default Shop;

@@ -92,19 +92,19 @@ export const themeSettings = {
     },
     h3: {
       fontFamily: ['Sourcse Sans Pro', 'sans-serif'].join(','),
-      fontSize: 24,
+      fontSize: 26,
     },
     h4: {
       fontFamily: ['Sourcse Sans Pro', 'sans-serif'].join(','),
-      fontSize: 20,
+      fontSize: 24,
     },
     h5: {
       fontFamily: ['Sourcse Sans Pro', 'sans-serif'].join(','),
-      fontSize: 16,
+      fontSize: 22,
     },
     h6: {
       fontFamily: ['Sourcse Sans Pro', 'sans-serif'].join(','),
-      fontSize: 14,
+      fontSize: 16,
     },
   },
 };
