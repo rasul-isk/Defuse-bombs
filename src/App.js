@@ -1,11 +1,11 @@
-import { theme } from './theme';
 import { CssBaseline, ThemeProvider } from '@mui/material'; //CssBaseline - resets CSS to defaults
-import Navigation from './components/Navigation';
-import { useState } from 'react';
-import InfoBox from './components/InfoBox';
-import { Game } from './components/Game';
+import { useEffect, useState } from 'react';
 import Difficulty from './components/Difficulty';
+import { Game } from './components/Game';
+import InfoBox from './components/InfoBox';
+import Navigation from './components/Navigation';
 import Shop from './components/Shop';
+import { theme } from './theme';
 // import { Routes, Route } from 'react-router-dom';
 
 function App() {
@@ -16,15 +16,27 @@ function App() {
   const [abilities, setAbilities] = useState('not chosen');
   const [timer, setTimer] = useState('00:00');
 
+  const musicURL = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3';
+  const [audio] = useState(new Audio(musicURL));
+  audio.loop = true;
+  audio.volume = 0.7;
+
+  useEffect(() => {
+    volume ? audio.play() : audio.pause();
+  }, [volume]);
+
   const togglePlay = (state) => {
     setPlay(state);
     setInformation(false);
   };
   const toggleVolume = () => setVolume((prev) => !prev);
-  const toggleInformation = () => setInformation((prev) => !prev);
+  const toggleInformation = () => {
+    if (play === 'started') setPlay('paused');
+    setInformation((prev) => !prev);
+  };
 
   const restart = () => {
-    setPlay('not started');
+    setPlay('started');
     setDifficulty('not chosen');
     setTimer('00:00');
     setAbilities('not chosen');
@@ -35,11 +47,20 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <div className="app">
-        <Navigation timer={timer} information={information} play={play} restart={restart} volume={volume} togglePlay={togglePlay} toggleVolume={toggleVolume} toggleInformation={toggleInformation} />
+        <Navigation
+          difficulty={difficulty}
+          information={information}
+          play={play}
+          restart={restart}
+          volume={volume}
+          togglePlay={togglePlay}
+          toggleVolume={toggleVolume}
+          toggleInformation={toggleInformation}
+        />
         {information && <InfoBox />}
         {play === 'started' && difficulty === 'not chosen' && <Difficulty setDifficulty={setDifficulty} />}
         {play === 'started' && difficulty !== 'not chosen' && abilities === 'not chosen' && <Shop setAbilities={setAbilities} difficulty={difficulty} />}
-        {abilities !== 'not chosen' && <Game play={play} difficult={difficulty} setTimer={setTimer} />}
+        {play === 'started' && abilities !== 'not chosen' && <Game play={play} difficult={difficulty} timer={timer} setTimer={setTimer} />}
       </div>
     </ThemeProvider>
   );
