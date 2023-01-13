@@ -8,16 +8,19 @@ import VolumeUpRoundedIcon from '@mui/icons-material/VolumeUpRounded';
 import { Box, Typography } from '@mui/material';
 import { colors } from '../theme';
 
-import Button from './Button';
+import Button from '../components/Button';
 
-const Header = ({ difficulty, information, play, volume, togglePlay, toggleVolume, toggleInformation, restart }) => {
+const Header = ({ timer, difficulty, information, play, volume, togglePlay, toggleVolume, toggleInformation, restart }) => {
   return (
     <Box className="container-item header" bgcolor={colors.red[500]} justifyContent="space-between">
       <Typography variant="h1" color={colors.primary[500]}>
         RESCUER
       </Typography>
 
-      <Box>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Typography variant="h3" sx={{ color: colors.primary[500], pr: '10px' }}>
+          {timer !== '00:00' ? timer : ''}
+        </Typography>
         {(play === 'not started' || play === 'paused') && <Button className="main-button" Icon={PlayCircleRoundedIcon} onClick={togglePlay} state="started" />}
         {play === 'started' && <Button className="main-button" Icon={PauseCircleRoundedIcon} onClick={togglePlay} state="paused" />}
         {difficulty !== 'not chosen' && <Button className="main-button" Icon={RestartAltRoundedIcon} onClick={restart} />}

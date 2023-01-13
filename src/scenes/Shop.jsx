@@ -1,14 +1,14 @@
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { Box, Typography } from '@mui/material';
 import React, { useState } from 'react';
+import Button from '../components/Button';
+import HeaderTitle from '../components/HeaderTitle';
+import PerkCard from '../components/PerkCard';
 import { colors } from '../theme';
-import HeaderTitle from './HeaderTitle';
-import PerkCard from './PerkCard';
 
-const Shop = ({ setAbilities, difficulty }) => {
-  if (difficulty === 'Crazy') setAbilities('none');
-
-  const [coins, setCoins] = useState(difficulty === 'Newbie' ? 750 : 500);
+const Shop = ({ captureAbilities, difficulty }) => {
+  const [coins, setCoins] = useState(difficulty === 'Newbie' ? 2000 : 750); //1000 | 750
   const [radar, setRadar] = useState(0);
   const [kamikaze, setKamikaze] = useState(0);
   const [fortune, setFortune] = useState(0);
@@ -58,12 +58,14 @@ const Shop = ({ setAbilities, difficulty }) => {
         <PerkCard title="Fortune" description="Fortune description (max x1)" update={update} amount={fortune} coins={coins} price={750} />
       </Box>
 
-      <Typography variant="h2" fontSize="26px" padding="30px 20px">
-        Balance:{coins}
-        <MonetizationOnIcon fontSize="large" sx={{ color: coins === 0 ? colors.primary[400] : colors.green[400] }}>
-          {coins}
-        </MonetizationOnIcon>
-      </Typography>
+      <Box display="flex" justifyContent="space-between">
+        <Typography variant="h3P" padding="30px 20px">
+          Balance:{coins}
+          <MonetizationOnIcon fontSize="large" sx={{ color: coins === 0 ? colors.primary[400] : colors.green[400] }} />
+        </Typography>
+
+        <Button className="main-button" text={'Start to play'} onClick={captureAbilities} Icon={PlayArrowIcon} state={[radar, kamikaze, fortune]} />
+      </Box>
     </Box>
   );
 };

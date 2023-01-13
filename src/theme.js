@@ -106,6 +106,14 @@ export const themeSettings = {
       fontFamily: ['Sourcse Sans Pro', 'sans-serif'].join(','),
       fontSize: 16,
     },
+    h3P: {
+      fontFamily: ['Press Start 2P', 'cursive'].join(','),
+      fontSize: 26,
+    },
+    h4P: {
+      fontFamily: ['Press Start 2P', 'cursive'].join(','),
+      fontSize: 16,
+    },
   },
 };
 

@@ -11,7 +11,7 @@ const PerkCard = ({ title, update, price, description, amount, coins }) => {
         <Typography variant="h5" maxWidth="240px" color={colors.red[500]} mb="40px" p="15px">
           {description}
         </Typography>
-        <Typography variant="h2" fontSize="26px" textAlign="left" color={colors.red[500]} p="0 15px">
+        <Typography variant="h3P" textAlign="left" color={colors.red[500]} p="0 15px">
           {title}
         </Typography>
         <Typography variant="h3" textAlign="left" color={colors.red[500]} p="0 15px">

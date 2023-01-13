@@ -1,8 +1,8 @@
 import { Box } from '@mui/material';
 import React from 'react';
 import { colors } from '../theme';
-import DifficultyCard from './DifficultyCard';
-import HeaderTitle from './HeaderTitle';
+import DifficultyCard from '../components/DifficultyCard';
+import HeaderTitle from '../components/HeaderTitle';
 
 const Difficulty = ({ setDifficulty }) => {
   return (

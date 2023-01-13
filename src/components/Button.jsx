@@ -1,13 +1,15 @@
+import { IconButton, Typography } from '@mui/material';
 import React from 'react';
-import { IconButton } from '@mui/material';
-const Button = ({ className, onClick, Icon, state }) => {
+const Button = ({ className, onClick, Icon, state, text, size, style }) => {
   return state ? (
-    <IconButton onClick={() => onClick(state)} className={className}>
-      <Icon fontSize="large" />
+    <IconButton sx={style} onClick={() => onClick(state)} className={className}>
+      {text && <Typography variant={size === 'small' ? 'h5' : 'h3'}>{text}</Typography>}
+      <Icon fontSize={size ? size : 'large'} />
     </IconButton>
   ) : (
-    <IconButton onClick={() => onClick()} className={className}>
-      <Icon fontSize="large" />
+    <IconButton sx={style} onClick={() => onClick()} className={className}>
+      {text && <Typography variant={size === 'small' ? 'h5' : 'h3'}>{text}</Typography>}
+      <Icon fontSize={size ? size : 'large'} />
     </IconButton>
   );
 };
