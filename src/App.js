@@ -10,9 +10,9 @@ import { theme } from './theme';
 
 function App() {
   const [play, setPlay] = useState('not started'); //not started | started | paused | finished
+  const [difficulty, setDifficulty] = useState('not chosen');
   const [volume, setVolume] = useState(false);
   const [information, setInformation] = useState(false);
-  const [difficulty, setDifficulty] = useState('not chosen');
   const [abilities, setAbilities] = useState({
     status: 'not chosen',
     radar: 0,

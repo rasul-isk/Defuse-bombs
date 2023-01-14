@@ -2,7 +2,6 @@ import { Box, IconButton, Typography } from '@mui/material';
 import React from 'react';
 import { colors } from '../theme';
 const AbilityButton = ({ onClick, Icon, state, text, size, boolean }) => {
-  console.log(`Bool: ${boolean}`);
   return (
     <Box>
       {boolean && !text && (
