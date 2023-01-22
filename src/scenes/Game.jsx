@@ -20,19 +20,63 @@ const addOneSecond = (prev) => {
   return [('0' + minutes).slice(-2), ('0' + seconds).slice(-2)].join(':');
 };
 
-export const Game = ({ map, play, setPlay, difficulty, timer, setTimer, abilities, useAbility, history, setHistory }) => {
+export const Game = ({ map, firstClick, setFirstClick, play, setPlay, difficulty, timer, setTimer, abilities, useAbility, history, setHistory }) => {
   const [gameOver, setGameOver] = useState(false);
+  const [allZeroesOpen, setAllZeroesOpen] = useState(false);
+  let mapSize = Object.entries(map).length;
+  let bombs = Object.entries(map).filter((el) => el[1] === 'X').length;
+  // console.log('game -' + bombs);
 
   useEffect(() => {
-    timer === '59:59' && setPlay('finished');
-    gameOver && play !== 'finished' && setPlay('finished');
-  }, [gameOver, timer, play, setPlay]);
+    if (firstClick !== '') {
+      setGameOver(false);
+      setFirstClick('');
+    }
+  }, [firstClick]);
 
   useEffect(() => {
-    const counter = play !== 'finished' && timer !== '59:59' && setInterval(() => setTimer((prev) => addOneSecond(prev)), 1000);
+    if (!gameOver && (mapSize === Object.entries(history).length + bombs)) console.log('win situation');
+  }, [gameOver, mapSize, history]);
 
-    return () => clearInterval(counter);
-  }, [timer, setTimer, play]);
+  useEffect(() => {
+    if (!allZeroesOpen) {
+      let totalZeroesOnMap = Object.entries(map).filter((el) => el[1] === '0').length;
+      let zeroesLeft = totalZeroesOnMap - Object.entries(map).filter((el) => el[1] === '0' && history[el[0]] === 'not hidden').length;
+
+      if (zeroesLeft > 0) {
+        let y = 1;
+        while (y <= mapSize) {
+          let x = 1;
+          while (x <= mapSize) {
+            if (history[`${x}-${y}`] === 'not hidden' && map[`${x}-${y}`] === '0') {
+              let possibilities = [`${x - 1}-${y}`, `${x}-${y - 1}`, `${x - 1}-${y - 1}`, `${x - 1}-${y + 1}`, `${x + 1}-${y}`, `${x}-${y + 1}`, `${x + 1}-${y + 1}`, `${x + 1}-${y - 1}`];
+              let zeroesArrToOpen = possibilities.filter((el) => map[el] === '0' && history[el] !== 'not hidden');
+              // console.log(zeroesArrToOpen);
+              if (zeroesArrToOpen.length) {
+                let cellsAsObject = zeroesArrToOpen.reduce((acc, cur) => ({ ...acc, [cur]: 'not hidden' }), {});
+                // console.log(cellsAsObject);
+                setHistory((prev) => ({ ...prev, ...cellsAsObject }));
+              }
+            }
+            x++;
+          }
+          y++;
+        }
+      } else {
+        setAllZeroesOpen(true);
+      }
+    }
+  }, [map, setHistory, history, allZeroesOpen]);
+
+  useEffect(() => {
+    // Time counting + finishing game + finishing at 59:59 with "game over"
+    if (timer === '59:59' || (gameOver && play !== 'finished')) setPlay('finished');
+    else {
+      const counter = play !== 'finished' && timer !== '59:59' && setInterval(() => setTimer((prev) => addOneSecond(prev)), 1000);
+
+      return () => clearInterval(counter);
+    }
+  }, [gameOver, timer, setTimer, play]);
 
   return (
     <Box className="container-item" bgcolor={colors.red[500]} display="block">
@@ -41,7 +85,7 @@ export const Game = ({ map, play, setPlay, difficulty, timer, setTimer, abilitie
       {play === 'finished' && <HeaderTitle title={'GAME OVER'} />}
       <Box display="flex">
         <Box sx={{ height: '400px', width: '400px', display: 'flex', flexWrap: 'wrap' }}>
-          <Grid map={map} history={history} setHistory={setHistory} difficulty={difficulty} width={400} setGameOver={setGameOver} gameOver={gameOver} />
+          <Grid map={map} firstClick={firstClick} history={history} setHistory={setHistory} difficulty={difficulty} width={400} setGameOver={setGameOver} gameOver={gameOver} />
         </Box>
         <VerticalDivider flex={0.05} />
         <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', flexDirection: 'column' }} flex={1}>
