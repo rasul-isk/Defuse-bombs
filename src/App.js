@@ -104,6 +104,7 @@ function App() {
     setScoreboard((prev) => !prev);
   };
   const toggleInformation = () => {
+    insertName('Example', '40:40', 'Newbie');
     if (play === 'started') setPlay('paused');
     setScoreboard(false);
     setInformation((prev) => !prev);
@@ -131,6 +132,11 @@ function App() {
     setAbilities((prev) => ({ ...prev, [ability]: prev[ability] - 1 }));
   };
 
+  const insertName = (name, score, difficulty) => {
+    setUsersScores((prev) => ({ ...prev, [difficulty]: { ...prev[difficulty], [name]: score } }));
+  };
+
+  console.log(usersScores);
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -166,6 +172,7 @@ function App() {
             useAbility={useAbility}
             history={history}
             setHistory={setHistory}
+            insertName={insertName}
           />
         )}
       </div>

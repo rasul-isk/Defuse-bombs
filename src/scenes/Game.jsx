@@ -20,7 +20,7 @@ const addOneSecond = (prev) => {
   return [('0' + minutes).slice(-2), ('0' + seconds).slice(-2)].join(':');
 };
 
-export const Game = ({ map, firstClick, setFirstClick, play, setPlay, difficulty, timer, setTimer, abilities, useAbility, history, setHistory }) => {
+export const Game = ({ map, insertName, firstClick, setFirstClick, play, setPlay, difficulty, timer, setTimer, abilities, useAbility, history, setHistory }) => {
   const [gameOver, setGameOver] = useState(false);
   const [allZeroesOpen, setAllZeroesOpen] = useState(false);
   let mapSize = Object.entries(map).length;
@@ -35,7 +35,13 @@ export const Game = ({ map, firstClick, setFirstClick, play, setPlay, difficulty
   }, [firstClick]);
 
   useEffect(() => {
-    if (!gameOver && (mapSize === Object.entries(history).length + bombs)) console.log('win situation');
+    //WIN SITUATION
+    if (!gameOver && mapSize === Object.entries(history).length + bombs) {
+      setPlay('finished');
+    }
+    //Name inserted...then
+    // insertName('Example', '40:40', difficulty);
+    //don't forget that it contains information from 3 difficulty modes.
   }, [gameOver, mapSize, history]);
 
   useEffect(() => {
@@ -82,7 +88,8 @@ export const Game = ({ map, firstClick, setFirstClick, play, setPlay, difficulty
     <Box className="container-item" bgcolor={colors.red[500]} display="block">
       {play === 'started' && <HeaderTitle title={'Game Started'} />}
       {play === 'paused' && <HeaderTitle title={'Game Paused'} />}
-      {play === 'finished' && <HeaderTitle title={'GAME OVER'} />}
+      {play === 'finished' && gameOver && <HeaderTitle title={'GAME OVER'} />}
+      {play === 'finished' && !gameOver && <HeaderTitle title={'YOU WON'} />}
       <Box display="flex">
         <Box sx={{ height: '400px', width: '400px', display: 'flex', flexWrap: 'wrap' }}>
           <Grid map={map} firstClick={firstClick} history={history} setHistory={setHistory} difficulty={difficulty} width={400} setGameOver={setGameOver} gameOver={gameOver} />
