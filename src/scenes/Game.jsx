@@ -20,8 +20,7 @@ const addOneSecond = (prev) => {
   return [('0' + minutes).slice(-2), ('0' + seconds).slice(-2)].join(':');
 };
 
-export const Game = ({ map, insertName, firstClick, setFirstClick, play, setPlay, difficulty, timer, setTimer, abilities, useAbility, history, setHistory }) => {
-  const [gameOver, setGameOver] = useState(false);
+export const Game = ({ map, gameOver, setGameOver, firstClick, setFirstClick, gameStatus, setGameStatus, difficulty, timer, setTimer, abilities, useAbility, history, setHistory }) => {
   const [allZeroesOpen, setAllZeroesOpen] = useState(false);
   let mapSize = Object.entries(map).length;
   let bombs = Object.entries(map).filter((el) => el[1] === 'X').length;
@@ -32,17 +31,14 @@ export const Game = ({ map, insertName, firstClick, setFirstClick, play, setPlay
       setGameOver(false);
       setFirstClick('');
     }
-  }, [firstClick]);
+  }, [firstClick, setGameOver, setFirstClick]);
 
   useEffect(() => {
     //WIN SITUATION
     if (!gameOver && mapSize === Object.entries(history).length + bombs) {
-      setPlay('finished');
+      setGameStatus('finished');
     }
-    //Name inserted...then
-    // insertName('Example', '40:40', difficulty);
-    //don't forget that it contains information from 3 difficulty modes.
-  }, [gameOver, mapSize, history]);
+  }, [gameOver, mapSize, history, bombs, setGameStatus]);
 
   useEffect(() => {
     if (!allZeroesOpen) {
@@ -72,24 +68,24 @@ export const Game = ({ map, insertName, firstClick, setFirstClick, play, setPlay
         setAllZeroesOpen(true);
       }
     }
-  }, [map, setHistory, history, allZeroesOpen]);
+  }, [map, setHistory, history, allZeroesOpen, mapSize]);
 
   useEffect(() => {
     // Time counting + finishing game + finishing at 59:59 with "game over"
-    if (timer === '59:59' || (gameOver && play !== 'finished')) setPlay('finished');
+    if (timer === '59:59' || (gameOver && gameStatus !== 'finished')) setGameStatus('finished');
     else {
-      const counter = play !== 'finished' && timer !== '59:59' && setInterval(() => setTimer((prev) => addOneSecond(prev)), 1000);
+      const counter = gameStatus !== 'finished' && timer !== '59:59' && setInterval(() => setTimer((prev) => addOneSecond(prev)), 1000);
 
       return () => clearInterval(counter);
     }
-  }, [gameOver, timer, setTimer, play]);
+  }, [gameOver, timer, setTimer, gameStatus, setGameStatus]);
 
   return (
     <Box className="container-item" bgcolor={colors.red[500]} display="block">
-      {play === 'started' && <HeaderTitle title={'Game Started'} />}
-      {play === 'paused' && <HeaderTitle title={'Game Paused'} />}
-      {play === 'finished' && gameOver && <HeaderTitle title={'GAME OVER'} />}
-      {play === 'finished' && !gameOver && <HeaderTitle title={'YOU WON'} />}
+      {gameStatus === 'started' && <HeaderTitle title={'Game Started'} />}
+      <Box onClick={() => setGameStatus('finished')}>HERE</Box>
+      {gameStatus === 'paused' && <HeaderTitle title={'Game Paused'} />}
+      {gameStatus === 'finished' && gameOver && <HeaderTitle title={'GAME OVER'} />}
       <Box display="flex">
         <Box sx={{ height: '400px', width: '400px', display: 'flex', flexWrap: 'wrap' }}>
           <Grid map={map} firstClick={firstClick} history={history} setHistory={setHistory} difficulty={difficulty} width={400} setGameOver={setGameOver} gameOver={gameOver} />
