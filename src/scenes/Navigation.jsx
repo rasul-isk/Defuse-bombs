@@ -12,7 +12,8 @@ import { colors } from '../theme';
 
 import Button from '../components/Button';
 
-const Header = ({ timer, difficulty, commonUI, dispatchUI, gameStatus, restart, togglePlay }) => {
+const Header = ({ gameInfo, commonUI, dispatchUI, togglePlay, restart }) => {
+  // console.log(`Game info` + Object.entries(gameInfo));
   return (
     <Box className="container-item header" bgcolor={colors.red[500]} justifyContent="space-between">
       <Typography variant="h1" color={colors.primary[500]}>
@@ -21,11 +22,11 @@ const Header = ({ timer, difficulty, commonUI, dispatchUI, gameStatus, restart, 
 
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <Typography variant="h3" sx={{ color: colors.primary[500], pr: '10px' }}>
-          {timer !== '00:00' ? timer : ''}
+          {gameInfo.timer !== '00:00' ? gameInfo.timer : ''}
         </Typography>
-        {(gameStatus === 'not started' || gameStatus === 'paused') && <Button className="main-button" Icon={PlayCircleRoundedIcon} onClick={togglePlay} state="started" />}
-        {gameStatus === 'started' && <Button className="main-button" Icon={PauseCircleRoundedIcon} onClick={togglePlay} state="paused" />}
-        {difficulty !== 'not chosen' && <Button className="main-button" Icon={RestartAltRoundedIcon} onClick={restart} />}
+        {(gameInfo.gameStatus === 'not started' || gameInfo.gameStatus === 'paused') && <Button className="main-button" Icon={PlayCircleRoundedIcon} onClick={togglePlay} state="started" />}
+        {gameInfo.gameStatus === 'started' && <Button className="main-button" Icon={PauseCircleRoundedIcon} onClick={togglePlay} state="paused" />}
+        {gameInfo.difficulty !== 'not chosen' && <Button className="main-button" Icon={RestartAltRoundedIcon} onClick={restart} />}
         {!commonUI.volume && <Button className="main-button" Icon={VolumeOffRoundedIcon} onClick={dispatchUI} state={{ switch: 'volume' }} />}
         {commonUI.volume && <Button className="main-button" Icon={VolumeUpRoundedIcon} onClick={dispatchUI} state={{ switch: 'volume' }} />}
         {!commonUI.scoreboard && <Button className="main-button" Icon={ContentPasteSearchIcon} onClick={dispatchUI} state={{ switch: 'scoreboard' }} />}

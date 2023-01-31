@@ -10,54 +10,46 @@ import HeaderTitle from '../components/HeaderTitle';
 import VerticalDivider from '../components/VerticalDivider';
 import { colors } from '../theme';
 
-const addOneSecond = (prev) => {
-  let [minutes, seconds] = prev.split(':');
-  seconds++;
-  if (seconds === 60) {
-    minutes++;
-    seconds = 0;
-  }
-  return [('0' + minutes).slice(-2), ('0' + seconds).slice(-2)].join(':');
-};
-
-export const Game = ({ map, gameOver, setGameOver, firstClick, setFirstClick, gameStatus, setGameStatus, difficulty, timer, setTimer, abilities, useAbility, history, setHistory }) => {
+export const Game = ({ gameInfo, dispatchGame }) => {
   const [allZeroesOpen, setAllZeroesOpen] = useState(false);
-  let mapSize = Object.entries(map).length;
-  let bombs = Object.entries(map).filter((el) => el[1] === 'X').length;
+  let mapSize = Object.entries(gameInfo.map).length;
+  let bombs = Object.entries(gameInfo.map).filter((el) => el[1] === 'X').length;
   // console.log('game -' + bombs);
+  console.log('triggers game jsx');
 
   useEffect(() => {
-    if (firstClick !== '') {
-      setGameOver(false);
-      setFirstClick('');
+    if (gameInfo.firstClick !== '') {
+      dispatchGame({ switch: 'gameOver', value: false });
+      dispatchGame({ switch: 'firstClick', value: '' });
     }
-  }, [firstClick, setGameOver, setFirstClick]);
+  }, [gameInfo.firstClick, dispatchGame]);
 
   useEffect(() => {
     //WIN SITUATION
-    if (!gameOver && mapSize === Object.entries(history).length + bombs) {
-      setGameStatus('finished');
+    // debugger;
+
+    if (!gameInfo.gameOver && mapSize === Object.entries(gameInfo.history).length + bombs) {
+      dispatchGame({ switch: 'gameStatus', value: 'finished' });
     }
-  }, [gameOver, mapSize, history, bombs, setGameStatus]);
+  }, [gameInfo.gameOver, mapSize, gameInfo.history, bombs]);
 
   useEffect(() => {
+    //if all zeroes open, do not look for cells (with value 0) and their nearby cells that can be unhided
     if (!allZeroesOpen) {
-      let totalZeroesOnMap = Object.entries(map).filter((el) => el[1] === '0').length;
-      let zeroesLeft = totalZeroesOnMap - Object.entries(map).filter((el) => el[1] === '0' && history[el[0]] === 'not hidden').length;
+      let totalZeroesOnMap = Object.entries(gameInfo.map).filter((el) => el[1] === '0').length;
+      let zeroesLeft = totalZeroesOnMap - Object.entries(gameInfo.map).filter((el) => el[1] === '0' && gameInfo.history[el[0]] === 'not hidden').length;
 
       if (zeroesLeft > 0) {
         let y = 1;
         while (y <= mapSize) {
           let x = 1;
           while (x <= mapSize) {
-            if (history[`${x}-${y}`] === 'not hidden' && map[`${x}-${y}`] === '0') {
+            if (gameInfo.history[`${x}-${y}`] === 'not hidden' && gameInfo.map[`${x}-${y}`] === '0') {
               let possibilities = [`${x - 1}-${y}`, `${x}-${y - 1}`, `${x - 1}-${y - 1}`, `${x - 1}-${y + 1}`, `${x + 1}-${y}`, `${x}-${y + 1}`, `${x + 1}-${y + 1}`, `${x + 1}-${y - 1}`];
-              let zeroesArrToOpen = possibilities.filter((el) => map[el] === '0' && history[el] !== 'not hidden');
-              // console.log(zeroesArrToOpen);
+              let zeroesArrToOpen = possibilities.filter((el) => gameInfo.map[el] === '0' && gameInfo.history[el] !== 'not hidden');
               if (zeroesArrToOpen.length) {
                 let cellsAsObject = zeroesArrToOpen.reduce((acc, cur) => ({ ...acc, [cur]: 'not hidden' }), {});
-                // console.log(cellsAsObject);
-                setHistory((prev) => ({ ...prev, ...cellsAsObject }));
+                dispatchGame({ switch: 'addToHistory', value: cellsAsObject });
               }
             }
             x++;
@@ -68,27 +60,27 @@ export const Game = ({ map, gameOver, setGameOver, firstClick, setFirstClick, ga
         setAllZeroesOpen(true);
       }
     }
-  }, [map, setHistory, history, allZeroesOpen, mapSize]);
+  }, [gameInfo.map, gameInfo.history, allZeroesOpen, mapSize]);
 
   useEffect(() => {
     // Time counting + finishing game + finishing at 59:59 with "game over"
-    if (timer === '59:59' || (gameOver && gameStatus !== 'finished')) setGameStatus('finished');
+    if (gameInfo.timer === '59:59' || (gameInfo.gameOver && gameInfo.gameStatus !== 'finished')) dispatchGame({ switch: 'gameStatus', value: 'finished' });
     else {
-      const counter = gameStatus !== 'finished' && timer !== '59:59' && setInterval(() => setTimer((prev) => addOneSecond(prev)), 1000);
+      const counter = gameInfo.gameStatus !== 'finished' && gameInfo.timer !== '59:59' && setInterval(() => dispatchGame({ switch: 'countTime' }), 1000);
 
       return () => clearInterval(counter);
     }
-  }, [gameOver, timer, setTimer, gameStatus, setGameStatus]);
+  }, [gameInfo.gameOver, gameInfo.timer, gameInfo.gameStatus]);
 
   return (
     <Box className="container-item" bgcolor={colors.red[500]} display="block">
-      {gameStatus === 'started' && <HeaderTitle title={'Game Started'} />}
-      <Box onClick={() => setGameStatus('finished')}>HERE</Box>
-      {gameStatus === 'paused' && <HeaderTitle title={'Game Paused'} />}
-      {gameStatus === 'finished' && gameOver && <HeaderTitle title={'GAME OVER'} />}
+      {gameInfo.gameStatus === 'started' && <HeaderTitle title={'Game Started'} />}
+      <Box onClick={() => dispatchGame({ switch: 'gameStatus', value: 'finished' })}>HERE</Box>
+      {gameInfo.gameStatus === 'paused' && <HeaderTitle title={'Game Paused'} />}
+      {gameInfo.gameStatus === 'finished' && gameInfo.gameOver && <HeaderTitle title={'GAME OVER'} />}
       <Box display="flex">
         <Box sx={{ height: '400px', width: '400px', display: 'flex', flexWrap: 'wrap' }}>
-          <Grid map={map} firstClick={firstClick} history={history} setHistory={setHistory} difficulty={difficulty} width={400} setGameOver={setGameOver} gameOver={gameOver} />
+          <Grid gameInfo={gameInfo} dispatchGame={dispatchGame} width={400} />
         </Box>
         <VerticalDivider flex={0.05} />
         <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', flexDirection: 'column' }} flex={1}>
@@ -98,25 +90,22 @@ export const Game = ({ map, gameOver, setGameOver, firstClick, setFirstClick, ga
                 Abilities
               </Typography>
             </Box>
-
             <Box sx={{ display: 'inline-flex', alignItems: 'center', pt: '15px' }}>
-              <Typography variant="h4P">Radar: {abilities.radar}</Typography>
-              <AbilityButton size="large" boolean={abilities.radar > 0} onClick={useAbility} Icon={RadarIcon} state={'radar'} />
+              <Typography variant="h4P">Radar: {gameInfo.abilities.radar}</Typography>
+              <AbilityButton size="large" boolean={gameInfo.abilities.radar > 0} onClick={dispatchGame} Icon={RadarIcon} state={{ switch: 'useAbility', value: 'radar' }} />
             </Box>
             <Box sx={{ display: 'inline-flex', alignItems: 'center', pt: '5px' }}>
-              <Typography variant="h4P">Kamikaze: {abilities.kamikaze}</Typography>
-              <AbilityButton size="large" boolean={abilities.kamikaze > 0} onClick={useAbility} Icon={AirplaneTicketIcon} state={'kamikaze'} />
+              <Typography variant="h4P">Kamikaze: {gameInfo.abilities.kamikaze}</Typography>
+              <AbilityButton size="large" boolean={gameInfo.abilities.kamikaze > 0} onClick={dispatchGame} Icon={AirplaneTicketIcon} state={{ switch: 'useAbility', value: 'kamikaze' }} />
             </Box>
             <Box sx={{ display: 'inline-flex', alignItems: 'center', pt: '5px' }}>
               <Typography variant="h4P">Fortune: </Typography>
-              {abilities.fortune === 1 && <AbilityButton size="large" Icon={EventAvailableIcon} state={'fortune'} text={'Active'} />}
-              {abilities.fortune === 0 && <AbilityButton size="large" Icon={EventBusyIcon} state={'fortune'} text={`None`} />}
-              {/* MAKE IT AUTOMATICALLY ACTIVE IF AVAILABLE OTHERWISE RED ICON NOT GREEN */}
-              {/* ICONS SHOULDNT BE CLICKABLE IF COUNT IS NOT ZERO AND SHOULD BE RED */}
+              {gameInfo.abilities.fortune === 1 && <AbilityButton size="large" Icon={EventAvailableIcon} state={'fortune'} text={'Active'} />}
+              {gameInfo.abilities.fortune === 0 && <AbilityButton size="large" Icon={EventBusyIcon} state={'fortune'} text={`None`} />}
             </Box>
           </Box>
 
-          {gameOver && (
+          {gameInfo.gameOver && (
             <Box sx={{ display: 'block', textAlign: 'center', mb: '30px' }}>
               <Typography variant="h4P">{'Mines exploded. All people dead SAD EMODJI'}</Typography>
             </Box>

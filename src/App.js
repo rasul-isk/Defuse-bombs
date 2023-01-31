@@ -17,12 +17,56 @@ const countValue = (bombs, xy) => {
   return possibilities.reduce((prev, cur) => prev + (bombs[cur] ? 1 : 0), 0).toString();
 };
 
+const addOneSecond = (prev) => {
+  let [minutes, seconds] = prev.split(':');
+  seconds++;
+  if (seconds === 60) {
+    minutes++;
+    seconds = 0;
+  }
+  return [('0' + minutes).slice(-2), ('0' + seconds).slice(-2)].join(':');
+};
+
+const defaultSettings = {
+  gameStatus: 'not started',
+  difficulty: 'not chosen',
+  timer: '00:00',
+  history: {},
+  map: {},
+  firstClick: '',
+  gameOver: false,
+  abilities: {
+    status: 'not chosen',
+    radar: 0,
+    kamikaze: 0,
+    fortune: 0,
+  },
+};
+
 const viewReducer = (prevState, curAction) => {
   return {
     volume: { information: false, scoreboard: false, volume: !prevState.volume, view: prevState.view },
     information: { scoreboard: false, volume: prevState.volume, information: !prevState.information, view: (!prevState.information && 'Infobox') || '' },
     scoreboard: { information: false, volume: prevState.volume, scoreboard: !prevState.scoreboard, view: (!prevState.scoreboard && 'Scoreboard') || '' },
     nullify: { information: false, scoreboard: false, volume: prevState.volume, view: '' },
+  }[curAction.switch];
+};
+
+const gameInfoReducer = (prevState, curAction) => {
+  return {
+    gameStatus: { ...prevState, gameStatus: curAction.value }, //not started | started | paused | finished
+    toggleGameStatus: { ...prevState, gameStatus: prevState['gameStatus'] === 'started' ? 'not started' : 'started' }, //not started | started | paused | finished
+    difficulty: { ...prevState, difficulty: curAction.value },
+    timer: { ...prevState, timer: curAction.value },
+    countTime: { ...prevState, timer: addOneSecond(prevState['timer']) },
+    history: { ...prevState, history: curAction.value },
+    addToHistory: { ...prevState, history: { ...prevState['history'], ...curAction.value } },
+    map: { ...prevState, map: curAction.value },
+    firstClick: { ...prevState, firstClick: curAction.value },
+    gameOver: { ...prevState, gameOver: curAction.value },
+    abilities: { ...prevState, abilities: curAction.value },
+    useAbility: { ...prevState, abilities: { ...prevState['abilities'], [curAction.value]: prevState['abilities'][curAction.value] - 1 } },
+    nullify: { ...defaultSettings },
   }[curAction.switch];
 };
 
@@ -37,7 +81,6 @@ function App() {
 
   //view param added how to implement?
   //Game status - play
-  const [gameStatus, setGameStatus] = useState('not started'); //not started | started | paused | finished
 
   const [commonUI, dispatchUI] = useReducer(viewReducer, {
     volume: false,
@@ -46,25 +89,8 @@ function App() {
     view: '',
   });
 
-  // const [volume, setVolume] = useState(false);
-  // const [information, setInformation] = useState(false);
-  // const [scoreboard, setScoreboard] = useState(false);
-
-  const [difficulty, setDifficulty] = useState('not chosen');
-  const [history, setHistory] = useState({});
-  const [map, setMap] = useState({});
-  const [firstClick, setFirstClick] = useState('');
-  const [gameOver, setGameOver] = useState(false);
-  const [abilities, setAbilities] = useState({
-    status: 'not chosen',
-    radar: 0,
-    kamikaze: 0,
-    fortune: 0,
-  });
-
+  const [gameInfo, dispatchGame] = useReducer(gameInfoReducer, defaultSettings);
   const [usersScores, setUsersScores] = useState(Data); //MODIFY IT TO GET RESULTS FROM SCOREBOARD
-
-  const [timer, setTimer] = useState('00:00');
 
   const musicURL = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3';
   const [audio] = useState(new Audio(musicURL));
@@ -72,13 +98,13 @@ function App() {
   audio.volume = 0.7;
 
   const renderMap = useCallback(() => {
-    let size = { Newbie: 10, Skilled: 15, Crazy: 20 }[difficulty];
+    let size = { Newbie: 10, Skilled: 15, Crazy: 20 }[gameInfo.difficulty];
     let restFields = {};
     let bombs = {};
 
     while (Object.entries(bombs).length !== size) {
       let newBomb = [Math.floor(Math.random() * size) + 1, Math.floor(Math.random() * size) + 1].join('-');
-      if (Object.entries(bombs).filter((el) => el !== newBomb && firstClick !== el)) bombs[newBomb] = 'X';
+      if (Object.entries(bombs).filter((el) => el !== newBomb && gameInfo.firstClick !== el)) bombs[newBomb] = 'X';
     }
 
     for (let y = 1; y <= size; y++) {
@@ -89,47 +115,46 @@ function App() {
       }
     }
 
-    setMap({ ...bombs, ...restFields });
-  }, [difficulty, firstClick]);
+    dispatchGame({ switch: 'map', value: { ...bombs, ...restFields } });
+  }, [gameInfo.difficulty, gameInfo.firstClick]);
 
   const captureAbilities = useCallback(
     ([radar, kamikaze, fortune]) => {
-      setAbilities((prev) => ({ ...prev, status: 'chosen', radar: radar, kamikaze: kamikaze, fortune: fortune }));
-
-      if (Object.entries(map).length === 0) renderMap();
+      console.log('reaches here app.js 123 line');
+      dispatchGame({ switch: 'abilities', value: { status: 'chosen', radar: radar, kamikaze: kamikaze, fortune: fortune } });
+      if (Object.entries(gameInfo.map).length === 0) renderMap();
     },
-    [map, renderMap]
+    [gameInfo.map, renderMap]
   );
 
   // console.log(Object.entries(map) + '\n\n\n\n');
   useEffect(() => {
-    if (difficulty === 'Crazy' && abilities.status !== 'chosen') captureAbilities([0, 0, 0]);
-  }, [difficulty, captureAbilities, abilities.status]);
+    if (gameInfo.difficulty === 'Crazy' && gameInfo.abilities.status !== 'chosen') captureAbilities([0, 0, 0]);
+  }, [gameInfo.difficulty, captureAbilities, gameInfo.abilities.status]);
 
   useEffect(() => {
     //First click always safe implementation
-    let historyArr = Object.entries(history);
+    let historyArr = Object.entries(gameInfo.history);
     if (historyArr.length === 1 && historyArr[0][1] === 'game over') {
-      setFirstClick(historyArr[0][0]);
-      setMap({});
+      dispatchGame({ switch: 'firstClick', value: historyArr[0][0] });
+      dispatchGame({ switch: 'map', value: {} });
       renderMap();
-      setHistory({ [historyArr[0][0]]: 'not hidden' });
-      setGameStatus('started');
+      dispatchGame({ switch: 'history', value: { [historyArr[0][0]]: 'not hidden' } });
+      dispatchGame({ switch: 'gameStatus', value: 'started' });
     }
-  }, [history, renderMap]);
+  }, [gameInfo.history, renderMap]);
 
   useEffect(() => {
     commonUI.volume ? audio.play() : audio.pause();
-  }, [commonUI.volume, audio]);
-  useEffect(() => {
-    if (commonUI.view !== '' && gameStatus === 'started') setGameStatus('paused');
-  }, [commonUI.view]);
 
-  const togglePlay = (state) => {
-    setGameStatus(state);
+    if (commonUI.view !== '' && gameInfo.gameStatus === 'started') dispatchGame({ switch: 'gameStatus', value: 'paused' });
+  }, [commonUI.volume, commonUI.view, gameInfo.gameStatus, audio]);
+
+  const togglePlay = () => {
+    dispatchGame({ switch: 'toggleGameStatus' });
     dispatchUI({ switch: 'nullify' });
   };
-  
+
   /*
   When u had multiple states   
   const toggleVolume = () => setVolume((prev) => !prev);
@@ -145,36 +170,25 @@ function App() {
   }; */
 
   const restart = () => {
-    setGameStatus('started');
-    setDifficulty('not chosen');
-    setTimer('00:00');
-    setAbilities({
-      status: 'not chosen',
-      radar: 0,
-      kamikaze: 0,
-      fortune: 0,
-    });
-    setMap({});
-    setHistory({});
-    setFirstClick('');
     dispatchUI({ switch: 'nullify' });
+    dispatchGame({ switch: 'nullify' });
+    dispatchGame({ switch: 'gameStatus', value: 'started' });
   };
 
   const showScoreBoard = () => {
     //When user won, scoreboard shown and game restarted
-    restart();
-    setGameStatus('not started');
     dispatchUI({ switch: 'nullify' });
+    dispatchGame({ switch: 'nullify' });
     dispatchUI({ switch: 'scoreboard' });
   };
 
-  const useAbility = (ability) => {
-    //USING ABILITY...
-    setAbilities((prev) => ({ ...prev, [ability]: prev[ability] - 1 }));
-  };
+  // const useAbility = (ability) => {
+  //   //USING ABILITY...
+  //   dispatchGame({ switch: 'useAbility', value: ability });
+  // };
 
   const insertName = (name) => {
-    setUsersScores((prev) => ({ ...prev, [difficulty]: { ...prev[difficulty], [name]: timer } }));
+    setUsersScores((prev) => ({ ...prev, [gameInfo.difficulty]: { ...prev[gameInfo.difficulty], [name]: gameInfo.timer } }));
   };
 
   // console.log(usersScores);
@@ -182,45 +196,17 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <div className="app">
-        <Navigation
-          timer={timer}
-          difficulty={difficulty}
-          commonUI={commonUI}
-          dispatchUI={dispatchUI}
-          gameStatus={gameStatus}
-          restart={restart}
-          // volume={volume}
-          // scoreboard={scoreboard}
-          togglePlay={togglePlay}
-          // toggleVolume={toggleVolume}
-          // toggleInformation={toggleInformation}
-          // toggleScoreboard={toggleScoreboard}
-        />
+        <Navigation commonUI={commonUI} dispatchUI={dispatchUI} gameInfo={gameInfo} restart={restart} togglePlay={togglePlay} />
         {commonUI.information && <InfoBox />}
         {commonUI.scoreboard && <Scoreboard usersData={usersScores} />}
-        {commonUI.view === '' && gameStatus === 'started' && difficulty === 'not chosen' && <Difficulty setDifficulty={setDifficulty} />}
-        {commonUI.view === '' && gameStatus === 'started' && difficulty !== 'not chosen' && difficulty !== 'Crazy' && abilities.status === 'not chosen' && (
-          <Shop captureAbilities={captureAbilities} difficulty={difficulty} />
+        {commonUI.view === '' && gameInfo.gameStatus === 'started' && gameInfo.difficulty === 'not chosen' && <Difficulty dispatchGame={dispatchGame} />}
+        {commonUI.view === '' && gameInfo.gameStatus === 'started' && gameInfo.difficulty !== 'not chosen' && gameInfo.difficulty !== 'Crazy' && gameInfo.abilities.status === 'not chosen' && (
+          <Shop captureAbilities={captureAbilities} difficulty={gameInfo.difficulty} />
         )}
-        {commonUI.view === '' && gameStatus !== 'paused' && abilities.status !== 'not chosen' && (gameOver === true || gameStatus !== 'finished') && (
-          <Game
-            firstClick={firstClick}
-            gameOver={gameOver}
-            setGameOver={setGameOver}
-            setFirstClick={setFirstClick}
-            map={map}
-            gameStatus={gameStatus}
-            setGameStatus={setGameStatus}
-            difficulty={difficulty}
-            timer={timer}
-            setTimer={setTimer}
-            abilities={abilities}
-            useAbility={useAbility}
-            history={history}
-            setHistory={setHistory}
-          />
+        {commonUI.view === '' && gameInfo.gameStatus !== 'paused' && gameInfo.abilities.status === 'chosen' && (gameInfo.gameOver === true || gameInfo.gameStatus !== 'finished') && (
+          <Game gameInfo={gameInfo} dispatchGame={dispatchGame} />
         )}
-        {commonUI.view === '' && gameOver === false && gameStatus === 'finished' && <Winner insertName={insertName} showScoreBoard={showScoreBoard} />}
+        {commonUI.view === '' && gameInfo.gameOver === false && gameInfo.gameStatus === 'finished' && <Winner insertName={insertName} showScoreBoard={showScoreBoard} />}
       </div>
     </ThemeProvider>
   );

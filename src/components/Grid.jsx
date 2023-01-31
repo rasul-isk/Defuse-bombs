@@ -7,11 +7,11 @@ const hiddenCell = { display: 'flex', background: colors.black[300], border: `1p
 const openedCell = { display: 'flex', background: colors.black[100], border: `1px solid ${colors.teal[300]}`, justifyContent: 'center', alignItems: 'center', color: colors.black[500] };
 const explodedCell = { display: 'flex', background: colors.red[500], border: `1px solid ${colors.black[500]}`, justifyContent: 'center', alignItems: 'center' };
 
-const Cell = ({ state, firstClick, squareSize, xy, setHistory, value, setGameOver, gameOver }) => {
+const Cell = ({ state, value, squareSize, xy, gameInfo, dispatchGame }) => {
   const size = { height: `${squareSize}px`, width: `${squareSize}px` };
   let stateStyle = { 'game over': { ...explodedCell }, hidden: { ...hiddenCell }, 'not hidden': { ...openedCell } }[state]; //background: colors.red[500];
   return (
-    <Box onClick={gameOver ? () => {} : () => Action(setHistory, xy, value, setGameOver, firstClick)} state={state} xy={xy} sx={{ ...stateStyle, ...size }}>
+    <Box onClick={gameInfo.gameOver ? () => {} : () => Action(dispatchGame, xy, value, gameInfo.firstClick)} state={state} xy={xy} sx={{ ...stateStyle, ...size }}>
       {state === 'game over' && (value === 'X' ? <img src={BombIcon} style={{ maxWidth: '90%', maxHeight: '90%' }} alt="bomb" /> : value)}
       {/* {state === 'not hidden' && (value === 'X' ? <img src={BombIcon} style={{ maxWidth: '90%', maxHeight: '90%' }} alt="bomb" /> : value !== '0' && value)} */}
       {state === 'hidden' && (value === 'X' ? <img src={BombIcon} style={{ maxWidth: '90%', maxHeight: '90%' }} alt="bomb" /> : value !== '0' && value)}
@@ -19,47 +19,43 @@ const Cell = ({ state, firstClick, squareSize, xy, setHistory, value, setGameOve
   );
 };
 
-const Action = (setHistory, xy, value, setGameOver, firstClick) => {
+const Action = (dispatchGame, xy, value, firstClick) => {
   let newState = value === 'X' ? 'game over' : 'not hidden';
-  setHistory((prev) => ({ ...prev, [xy]: newState }));
+  dispatchGame({ switch: 'addToHistory', value: { [xy]: newState } });
+
   if (newState === 'game over' && firstClick === '') {
-    setGameOver(true);
-    console.log('reached: ' + firstClick);
+    dispatchGame({ switch: 'gameOver', value: true });
   }
 };
 
-const Grid = ({ map, firstClick, history, setHistory, difficulty, width, setGameOver, gameOver }) => {
-  let squareSize = width / { Newbie: 10, Skilled: 15, Crazy: 20 }[difficulty];
-  let size = { Newbie: 10, Skilled: 15, Crazy: 20 }[difficulty];
-
-  let table = useMemo(
-    () => renderOfMatrix(map, firstClick, history, setHistory, size, squareSize, setGameOver, gameOver),
-    [map, firstClick, history, setHistory, size, squareSize, setGameOver, gameOver]
-  );
-
+const Grid = ({ gameInfo, dispatchGame, width }) => {
+  let squareSize = width / { Newbie: 10, Skilled: 15, Crazy: 20 }[gameInfo.difficulty];
+  let size = { Newbie: 10, Skilled: 15, Crazy: 20 }[gameInfo.difficulty];
+  console.log('reaches here grid 34 line');
+  let table = useMemo(() => renderOfMatrix(gameInfo, dispatchGame, size, squareSize), [gameInfo.map, gameInfo.firstClick, gameInfo.history, size, squareSize, gameInfo.gameOver]);
+  // debugger;
   return table;
 };
 
-const renderOfMatrix = (map, firstClick, history, setHistory, size, squareSize, setGameOver, gameOver) => {
+const renderOfMatrix = (gameInfo, dispatchGame, size, squareSize) => {
   let table = [];
   // console.log(Object.entries(map));
   for (let y = 1; y <= size; y++) {
     for (let x = 1; x <= size; x++) {
       table.push(
         <Cell
-          firstClick={firstClick}
           key={`${x}-${y}`}
           xy={`${x}-${y}`}
-          state={history[`${x}-${y}`] || 'hidden'}
+          state={gameInfo.history[`${x}-${y}`] || 'hidden'}
           squareSize={squareSize}
-          setHistory={setHistory}
-          value={map[`${x}-${y}`]}
-          setGameOver={setGameOver}
-          gameOver={gameOver}
+          value={gameInfo.map[`${x}-${y}`]}
+          gameInfo={gameInfo}
+          dispatchGame={dispatchGame}
         />
       );
     }
   }
+  console.log(table);
 
   return table;
 };
