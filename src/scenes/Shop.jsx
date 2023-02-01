@@ -14,38 +14,21 @@ const Shop = ({ captureAbilities, difficulty }) => {
   const [fortune, setFortune] = useState(0);
 
   let update = (title, operation, amount) => {
-    //writing as object? why switch sucks
-    switch (title) {
-      case 'Radar':
-        if (operation === '+') {
-          setCoins((prev) => (prev -= amount));
-          setRadar((prev) => (prev += 1));
-        } else {
-          setCoins((prev) => (prev += amount));
-          setRadar((prev) => (prev -= 1));
-        }
-        break;
-      case 'Kamikaze':
-        if (operation === '+') {
-          setCoins((prev) => (prev -= amount));
-          setKamikaze((prev) => (prev += 1));
-        } else {
-          setCoins((prev) => (prev += amount));
-          setKamikaze((prev) => (prev -= 1));
-        }
-        break;
-      case 'Fortune':
-        if (operation === '+') {
-          setCoins((prev) => (prev -= amount));
-          setFortune((prev) => (prev += 1));
-        } else {
-          setCoins((prev) => (prev += amount));
-          setFortune((prev) => (prev -= 1));
-        }
-        break;
-      default:
-        break;
-    }
+    const action = {
+      Radar: () => {
+        setCoins((prev) => (prev = operation === '+' ? prev - amount : prev + amount));
+        setRadar((prev) => (prev = operation === '+' ? prev + 1 : prev - 1));
+      },
+      Kamikaze: () => {
+        setCoins((prev) => (prev = operation === '+' ? prev - amount : prev + amount));
+        setKamikaze((prev) => (prev = operation === '+' ? prev + 1 : prev - 1));
+      },
+      Fortune: () => {
+        setCoins((prev) => (prev = operation === '+' ? prev - amount : prev + amount));
+        setFortune((prev) => (prev = operation === '+' ? prev + 1 : prev - 1));
+      },
+    };
+    return action[title]();
   };
 
   return (
