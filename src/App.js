@@ -71,17 +71,6 @@ const gameInfoReducer = (prevState, curAction) => {
 };
 
 function App() {
-  //none
-  //Infobox | information
-  //Scoreboard | scoreboard
-  //Difficulty | play === 'started' && difficulty === 'not chosen'
-  //Shop | play === 'started' && difficulty !== 'not chosen' && difficulty !== 'Crazy' && abilities.status === 'not chosen'
-  //Game start | play !== 'paused' && abilities.status !== 'not chosen' && (gameOver === true || play !== 'finished')
-  //Winner | gameOver === false && play === 'finished'
-
-  //view param added how to implement?
-  //Game status - play
-
   const [commonUI, dispatchUI] = useReducer(viewReducer, {
     volume: false,
     information: false,
@@ -127,7 +116,6 @@ function App() {
     [gameInfo.map, renderMap]
   );
 
-  // console.log(Object.entries(map) + '\n\n\n\n');
   useEffect(() => {
     if (gameInfo.difficulty === 'Crazy' && gameInfo.abilities.status !== 'chosen') captureAbilities([0, 0, 0]);
   }, [gameInfo.difficulty, captureAbilities, gameInfo.abilities.status]);
@@ -182,16 +170,10 @@ function App() {
     dispatchUI({ switch: 'scoreboard' });
   };
 
-  // const useAbility = (ability) => {
-  //   //USING ABILITY...
-  //   dispatchGame({ switch: 'useAbility', value: ability });
-  // };
-
   const insertName = (name) => {
     setUsersScores((prev) => ({ ...prev, [gameInfo.difficulty]: { ...prev[gameInfo.difficulty], [name]: gameInfo.timer } }));
   };
 
-  // console.log(usersScores);
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />

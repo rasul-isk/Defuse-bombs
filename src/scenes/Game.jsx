@@ -14,8 +14,6 @@ export const Game = ({ gameInfo, dispatchGame }) => {
   const [allZeroesOpen, setAllZeroesOpen] = useState(false);
   let mapSize = Object.entries(gameInfo.map).length;
   let bombs = Object.entries(gameInfo.map).filter((el) => el[1] === 'X').length;
-  // console.log('game -' + bombs);
-  console.log('triggers game jsx');
 
   useEffect(() => {
     if (gameInfo.firstClick !== '') {
@@ -26,7 +24,6 @@ export const Game = ({ gameInfo, dispatchGame }) => {
 
   useEffect(() => {
     //WIN SITUATION
-    // debugger;
 
     if (!gameInfo.gameOver && mapSize === Object.entries(gameInfo.history).length + bombs) {
       dispatchGame({ switch: 'gameStatus', value: 'finished' });

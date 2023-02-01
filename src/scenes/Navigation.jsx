@@ -13,7 +13,6 @@ import { colors } from '../theme';
 import Button from '../components/Button';
 
 const Header = ({ gameInfo, commonUI, dispatchUI, togglePlay, restart }) => {
-  // console.log(`Game info` + Object.entries(gameInfo));
   return (
     <Box className="container-item header" bgcolor={colors.red[500]} justifyContent="space-between">
       <Typography variant="h1" color={colors.primary[500]}>

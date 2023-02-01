@@ -33,13 +33,12 @@ const Grid = ({ gameInfo, dispatchGame, width }) => {
   let size = { Newbie: 10, Skilled: 15, Crazy: 20 }[gameInfo.difficulty];
   console.log('reaches here grid 34 line');
   let table = useMemo(() => renderOfMatrix(gameInfo, dispatchGame, size, squareSize), [gameInfo.map, gameInfo.firstClick, gameInfo.history, size, squareSize, gameInfo.gameOver]);
-  // debugger;
   return table;
 };
 
 const renderOfMatrix = (gameInfo, dispatchGame, size, squareSize) => {
   let table = [];
-  // console.log(Object.entries(map));
+
   for (let y = 1; y <= size; y++) {
     for (let x = 1; x <= size; x++) {
       table.push(
