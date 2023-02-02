@@ -14,6 +14,7 @@ export const Game = ({ gameInfo, dispatchGame }) => {
   const [allZeroesOpen, setAllZeroesOpen] = useState(false);
   let mapSize = Object.entries(gameInfo.map).length;
   let bombs = Object.entries(gameInfo.map).filter((el) => el[1] === 'X').length;
+  // const [activeAbility, setActiveAbility] = useState('');
 
   useEffect(() => {
     if (gameInfo.firstClick !== '') {
@@ -72,7 +73,10 @@ export const Game = ({ gameInfo, dispatchGame }) => {
   return (
     <Box className="container-item" bgcolor={colors.red[500]} display="block">
       {gameInfo.gameStatus === 'started' && <HeaderTitle title={'Game Started'} />}
+
       <Box onClick={() => dispatchGame({ switch: 'gameStatus', value: 'finished' })}>HERE</Box>
+
+      {/* {activeAbility === 'Radar' && <Typography variant="h4P">Choose 3x3 place to scan...</Typography>} */}
       {gameInfo.gameStatus === 'paused' && <HeaderTitle title={'Game Paused'} />}
       {gameInfo.gameStatus === 'finished' && gameInfo.gameOver && <HeaderTitle title={'GAME OVER'} />}
       <Box display="flex">

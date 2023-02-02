@@ -55,7 +55,7 @@ const viewReducer = (prevState, curAction) => {
 const gameInfoReducer = (prevState, curAction) => {
   return {
     gameStatus: { ...prevState, gameStatus: curAction.value }, //not started | started | paused | finished
-    toggleGameStatus: { ...prevState, gameStatus: prevState['gameStatus'] === 'started' ? 'not started' : 'started' }, //not started | started | paused | finished
+    toggleGameStatus: { ...prevState, gameStatus: prevState['gameStatus'] === 'started' ? 'paused' : 'started' }, //not started | started | paused | finished
     difficulty: { ...prevState, difficulty: curAction.value },
     timer: { ...prevState, timer: curAction.value },
     countTime: { ...prevState, timer: addOneSecond(prevState['timer']) },
@@ -109,7 +109,6 @@ function App() {
 
   const captureAbilities = useCallback(
     ([radar, kamikaze, fortune]) => {
-      console.log('reaches here app.js 123 line');
       dispatchGame({ switch: 'abilities', value: { status: 'chosen', radar: radar, kamikaze: kamikaze, fortune: fortune } });
       if (Object.entries(gameInfo.map).length === 0) renderMap();
     },
