@@ -12,6 +12,7 @@ import { colors } from '../theme';
 
 export const Game = ({ gameInfo, dispatchGame }) => {
   const [allZeroesOpen, setAllZeroesOpen] = useState(false);
+  const [usedFortune] = useState(gameInfo.abilities.fortune);
   let mapSize = Object.entries(gameInfo.map).length;
   let bombs = Object.entries(gameInfo.map).filter((el) => el[1] === 'X').length;
   // const [activeAbility, setActiveAbility] = useState('');
@@ -29,7 +30,7 @@ export const Game = ({ gameInfo, dispatchGame }) => {
     if (!gameInfo.gameOver && mapSize === Object.entries(gameInfo.history).length + bombs) {
       dispatchGame({ switch: 'gameStatus', value: 'finished' });
     }
-  }, [gameInfo.gameOver, mapSize, gameInfo.history, bombs]);
+  }, [gameInfo.gameOver, mapSize, gameInfo.history, bombs, dispatchGame]);
 
   useEffect(() => {
     //if all zeroes open, do not look for cells (with value 0) and their nearby cells that can be unhided
@@ -58,7 +59,7 @@ export const Game = ({ gameInfo, dispatchGame }) => {
         setAllZeroesOpen(true);
       }
     }
-  }, [gameInfo.map, gameInfo.history, allZeroesOpen, mapSize]);
+  }, [gameInfo.map, gameInfo.history, allZeroesOpen, mapSize, dispatchGame]);
 
   useEffect(() => {
     // Time counting + finishing game + finishing at 59:59 with "game over"
@@ -68,7 +69,7 @@ export const Game = ({ gameInfo, dispatchGame }) => {
 
       return () => clearInterval(counter);
     }
-  }, [gameInfo.gameOver, gameInfo.timer, gameInfo.gameStatus]);
+  }, [gameInfo.gameOver, gameInfo.timer, gameInfo.gameStatus, dispatchGame]);
 
   return (
     <Box className="container-item" bgcolor={colors.red[500]} display="block">
@@ -93,16 +94,25 @@ export const Game = ({ gameInfo, dispatchGame }) => {
             </Box>
             <Box sx={{ display: 'inline-flex', alignItems: 'center', pt: '15px' }}>
               <Typography variant="h4P">Radar: {gameInfo.abilities.radar}</Typography>
-              <AbilityButton size="large" boolean={gameInfo.abilities.radar > 0} onClick={dispatchGame} Icon={RadarIcon} state={{ switch: 'useAbility', value: 'radar' }} />
+              <AbilityButton size="large" boolean={!gameInfo.gameOver && gameInfo.abilities.radar > 0} onClick={dispatchGame} Icon={RadarIcon} state={{ switch: 'useAbility', value: 'radar' }} />
             </Box>
             <Box sx={{ display: 'inline-flex', alignItems: 'center', pt: '5px' }}>
               <Typography variant="h4P">Kamikaze: {gameInfo.abilities.kamikaze}</Typography>
-              <AbilityButton size="large" boolean={gameInfo.abilities.kamikaze > 0} onClick={dispatchGame} Icon={AirplaneTicketIcon} state={{ switch: 'useAbility', value: 'kamikaze' }} />
+              <AbilityButton
+                size="large"
+                boolean={!gameInfo.gameOver && gameInfo.abilities.kamikaze > 0}
+                onClick={dispatchGame}
+                Icon={AirplaneTicketIcon}
+                state={{ switch: 'useAbility', value: 'kamikaze' }}
+              />
             </Box>
             <Box sx={{ display: 'inline-flex', alignItems: 'center', pt: '5px' }}>
               <Typography variant="h4P">Fortune: </Typography>
-              {gameInfo.abilities.fortune === 1 && <AbilityButton size="large" Icon={EventAvailableIcon} state={'fortune'} text={'Active'} />}
-              {gameInfo.abilities.fortune === 0 && <AbilityButton size="large" Icon={EventBusyIcon} state={'fortune'} text={`None`} />}
+              {gameInfo.abilities.fortune === 1 ? (
+                <AbilityButton size="large" Icon={EventAvailableIcon} state={'fortune'} text={'Active'} />
+              ) : (
+                <AbilityButton size="large" Icon={EventBusyIcon} state={'fortune'} text={usedFortune === gameInfo.abilities.fortune ? 'None' : 'Used'} />
+              )}
             </Box>
           </Box>
 

@@ -4,9 +4,11 @@ import React, { useMemo } from 'react';
 import BombIcon from '../pics/bomb.png';
 import { colors } from '../theme';
 
-const hiddenCell = { display: 'flex', background: colors.black[300], border: `1px solid ${colors.teal[500]}`, justifyContent: 'center', alignItems: 'center' };
-const openedCell = { display: 'flex', background: colors.black[100], border: `1px solid ${colors.teal[300]}`, justifyContent: 'center', alignItems: 'center', color: colors.black[500] };
-const explodedCell = { display: 'flex', background: colors.red[500], border: `1px solid ${colors.black[500]}`, justifyContent: 'center', alignItems: 'center' };
+const generalStyle = { display: 'flex', justifyContent: 'center', alignItems: 'center' };
+const hiddenCell = { ...generalStyle, background: colors.black[300], border: `1px solid ${colors.teal[500]}` };
+const openedCell = { ...generalStyle, background: colors.black[100], border: `1px solid ${colors.teal[300]}`, color: colors.black[500] };
+const explodedCell = { ...generalStyle, background: colors.red[500], border: `1px solid ${colors.black[500]}` };
+
 const Bomb = <img src={BombIcon} style={{ maxWidth: '90%', maxHeight: '90%' }} alt="bomb" />;
 const flagStyle = { maxWidth: '90%', maxHeight: '90%', color: colors.red[500] };
 
@@ -15,12 +17,15 @@ const Cell = ({ squareSize, xy, gameInfo, dispatchGame }) => {
   let state = gameInfo.history[xy] || 'hidden';
   let flag = gameInfo.flags[xy] || false; //change it to ->  gameInfo.flags[xy] || false;
   let value = gameInfo.map[xy];
-
+  let emptyHistory = Object.entries(gameInfo.history).length === 0;
+  console.log('GAMEOVER?' + gameInfo.history[xy]);
   let stateStyle = { 'game over': { ...explodedCell }, hidden: { ...hiddenCell }, 'not hidden': { ...openedCell } }[state]; //background: colors.red[500];
+  if (state === 'not hidden' && value === 'X' && !gameInfo.gameOver) stateStyle['background'] = colors.teal[700]; // && !gameInfo.gameOver
+  // console.log(state + ' ' + value + ' ' + gameInfo.gameOver);
 
   return (
     <Box
-      onClick={(gameInfo.gameOver || gameInfo.flags[xy]) ? () => {} : () => Action(dispatchGame, xy, value, gameInfo.firstClick)}
+      onClick={gameInfo.gameOver || gameInfo.flags[xy] ? () => {} : () => Action(dispatchGame, xy, value, gameInfo.abilities.fortune, emptyHistory)}
       state={state}
       xy={xy}
       sx={{ ...stateStyle, ...size }}
@@ -31,26 +36,30 @@ const Cell = ({ squareSize, xy, gameInfo, dispatchGame }) => {
       }}
     >
       {state === 'game over' && (value === 'X' ? Bomb : value)}
-      {/* {state === 'not hidden' && (value === 'X' ? Bomb : value !== '0' && value)} */}
-      {state === 'hidden' && !flag && (value === 'X' ? Bomb : value !== '0' && value)}
+      {state === 'not hidden' && (value === 'X' ? Bomb : value !== '0' && value)}
+      {/* {state === 'hidden' && !flag && (value === 'X' ? Bomb : value !== '0' && value)} */}
       {state === 'hidden' && flag && <FlagIcon sx={{ ...flagStyle }} />}
     </Box>
   );
 };
 
-const Action = (dispatchGame, xy, value, firstClick) => {
+const Action = (dispatchGame, xy, value, fortune, emptyHistory) => {
   let newState = value === 'X' ? 'game over' : 'not hidden';
+  console.log('fortune: ' + fortune);
   dispatchGame({ switch: 'addToHistory', value: { [xy]: newState } });
 
-  if (newState === 'game over' && firstClick === '') {
-    dispatchGame({ switch: 'gameOver', value: true });
+  if (newState === 'game over' && !emptyHistory) {
+    if (fortune) {
+      dispatchGame({ switch: 'useAbility', value: 'fortune' });
+      dispatchGame({ switch: 'addToHistory', value: { [xy]: 'not hidden' } });
+    } else dispatchGame({ switch: 'gameOver', value: true });
   }
 };
 
 const Grid = ({ gameInfo, dispatchGame, width }) => {
   let squareSize = width / { Newbie: 10, Skilled: 15, Crazy: 20 }[gameInfo.difficulty];
   let size = { Newbie: 10, Skilled: 15, Crazy: 20 }[gameInfo.difficulty];
-  let table = useMemo(() => renderOfMatrix(gameInfo, dispatchGame, size, squareSize), [gameInfo.map, gameInfo.firstClick, gameInfo.history, size, squareSize, gameInfo.gameOver, gameInfo.flags]);
+  let table = useMemo(() => renderOfMatrix(gameInfo, dispatchGame, size, squareSize), [gameInfo, dispatchGame, size, squareSize]);
   return table;
 };
 
