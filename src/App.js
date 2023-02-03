@@ -33,6 +33,7 @@ const defaultSettings = {
   timer: '00:00',
   history: {},
   map: {},
+  flags: {},
   firstClick: '',
   gameOver: false,
   abilities: {
@@ -60,7 +61,9 @@ const gameInfoReducer = (prevState, curAction) => {
     timer: { ...prevState, timer: curAction.value },
     countTime: { ...prevState, timer: addOneSecond(prevState['timer']) },
     history: { ...prevState, history: curAction.value },
+    flags: { ...prevState, flags: curAction.value },
     addToHistory: { ...prevState, history: { ...prevState['history'], ...curAction.value } },
+    addToFlags: { ...prevState, flags: { ...prevState['flags'], ...curAction.value } },
     map: { ...prevState, map: curAction.value },
     firstClick: { ...prevState, firstClick: curAction.value },
     gameOver: { ...prevState, gameOver: curAction.value },
