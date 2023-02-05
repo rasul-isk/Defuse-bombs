@@ -15,7 +15,6 @@ export const Game = ({ gameInfo, dispatchGame }) => {
   const [usedFortune] = useState(gameInfo.abilities.fortune);
   let mapSize = Object.entries(gameInfo.map).length;
   let bombs = Object.entries(gameInfo.map).filter((el) => el[1] === 'X').length;
-  // const [activeAbility, setActiveAbility] = useState('');
 
   useEffect(() => {
     if (gameInfo.firstClick !== '') {
@@ -77,7 +76,8 @@ export const Game = ({ gameInfo, dispatchGame }) => {
 
       <Box onClick={() => dispatchGame({ switch: 'gameStatus', value: 'finished' })}>HERE</Box>
 
-      {/* {activeAbility === 'Radar' && <Typography variant="h4P">Choose 3x3 place to scan...</Typography>} */}
+      {gameInfo.activeAbility === 'radar' && <Typography variant="h5P">Choose area to scan...</Typography>}
+      {gameInfo.activeAbility === 'kamikaze' && <Typography variant="h5P">Choose line to call kamikaze...</Typography>}
       {gameInfo.gameStatus === 'paused' && <HeaderTitle title={'Game Paused'} />}
       {gameInfo.gameStatus === 'finished' && gameInfo.gameOver && <HeaderTitle title={'GAME OVER'} />}
       <Box display="flex">
@@ -94,14 +94,20 @@ export const Game = ({ gameInfo, dispatchGame }) => {
             </Box>
             <Box sx={{ display: 'inline-flex', alignItems: 'center', pt: '15px' }}>
               <Typography variant="h4P">Radar: {gameInfo.abilities.radar}</Typography>
-              <AbilityButton size="large" boolean={!gameInfo.gameOver && gameInfo.abilities.radar > 0} onClick={dispatchGame} Icon={RadarIcon} state={{ switch: 'useAbility', value: 'radar' }} />
+              <AbilityButton
+                size="large"
+                boolean={!gameInfo.gameOver && gameInfo.abilities.radar > 0 && !gameInfo.activeAbility}
+                dispatchGame={dispatchGame}
+                Icon={RadarIcon}
+                state={{ switch: 'useAbility', value: 'radar' }}
+              />
             </Box>
             <Box sx={{ display: 'inline-flex', alignItems: 'center', pt: '5px' }}>
               <Typography variant="h4P">Kamikaze: {gameInfo.abilities.kamikaze}</Typography>
               <AbilityButton
                 size="large"
-                boolean={!gameInfo.gameOver && gameInfo.abilities.kamikaze > 0}
-                onClick={dispatchGame}
+                boolean={!gameInfo.gameOver && gameInfo.abilities.kamikaze > 0 && !gameInfo.activeAbility}
+                dispatchGame={dispatchGame}
                 Icon={AirplaneTicketIcon}
                 state={{ switch: 'useAbility', value: 'kamikaze' }}
               />

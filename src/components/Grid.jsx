@@ -18,10 +18,9 @@ const Cell = ({ squareSize, xy, gameInfo, dispatchGame }) => {
   let flag = gameInfo.flags[xy] || false; //change it to ->  gameInfo.flags[xy] || false;
   let value = gameInfo.map[xy];
   let emptyHistory = Object.entries(gameInfo.history).length === 0;
-  console.log('GAMEOVER?' + gameInfo.history[xy]);
+  // console.log('Grid' + gameInfo.history[xy]);
   let stateStyle = { 'game over': { ...explodedCell }, hidden: { ...hiddenCell }, 'not hidden': { ...openedCell } }[state]; //background: colors.red[500];
   if (state === 'not hidden' && value === 'X' && !gameInfo.gameOver) stateStyle['background'] = colors.teal[700]; // && !gameInfo.gameOver
-  // console.log(state + ' ' + value + ' ' + gameInfo.gameOver);
 
   return (
     <Box
@@ -57,6 +56,7 @@ const Action = (dispatchGame, xy, value, fortune, emptyHistory) => {
 };
 
 const Grid = ({ gameInfo, dispatchGame, width }) => {
+  console.log('now I know, when I have active ability. current one: ' + gameInfo.activeAbility); //STOPPED HERE
   let squareSize = width / { Newbie: 10, Skilled: 15, Crazy: 20 }[gameInfo.difficulty];
   let size = { Newbie: 10, Skilled: 15, Crazy: 20 }[gameInfo.difficulty];
   let table = useMemo(() => renderOfMatrix(gameInfo, dispatchGame, size, squareSize), [gameInfo, dispatchGame, size, squareSize]);

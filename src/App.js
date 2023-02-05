@@ -42,35 +42,36 @@ const defaultSettings = {
     kamikaze: 0,
     fortune: 0,
   },
+  activeAbility: '',
 };
 
-const viewReducer = (prevState, curAction) => {
+const viewReducer = (prev, current) => {
   return {
-    volume: { information: false, scoreboard: false, volume: !prevState.volume, view: prevState.view },
-    information: { scoreboard: false, volume: prevState.volume, information: !prevState.information, view: (!prevState.information && 'Infobox') || '' },
-    scoreboard: { information: false, volume: prevState.volume, scoreboard: !prevState.scoreboard, view: (!prevState.scoreboard && 'Scoreboard') || '' },
-    nullify: { information: false, scoreboard: false, volume: prevState.volume, view: '' },
-  }[curAction.switch];
+    volume: { information: false, scoreboard: false, volume: !prev.volume, view: prev.view },
+    information: { scoreboard: false, volume: prev.volume, information: !prev.information, view: (!prev.information && 'Infobox') || '' },
+    scoreboard: { information: false, volume: prev.volume, scoreboard: !prev.scoreboard, view: (!prev.scoreboard && 'Scoreboard') || '' },
+    nullify: { information: false, scoreboard: false, volume: prev.volume, view: '' },
+  }[current.switch];
 };
 
-const gameInfoReducer = (prevState, curAction) => {
+const gameInfoReducer = (prev, cur) => {
   return {
-    gameStatus: { ...prevState, gameStatus: curAction.value }, //not started | started | paused | finished
-    toggleGameStatus: { ...prevState, gameStatus: prevState['gameStatus'] === 'started' ? 'paused' : 'started' }, //not started | started | paused | finished
-    difficulty: { ...prevState, difficulty: curAction.value },
-    timer: { ...prevState, timer: curAction.value },
-    countTime: { ...prevState, timer: addOneSecond(prevState['timer']) },
-    history: { ...prevState, history: curAction.value },
-    flags: { ...prevState, flags: curAction.value },
-    addToHistory: { ...prevState, history: { ...prevState['history'], ...curAction.value } },
-    addToFlags: { ...prevState, flags: { ...prevState['flags'], ...curAction.value } },
-    map: { ...prevState, map: curAction.value },
-    firstClick: { ...prevState, firstClick: curAction.value },
-    gameOver: { ...prevState, gameOver: curAction.value },
-    abilities: { ...prevState, abilities: curAction.value },
-    useAbility: { ...prevState, abilities: { ...prevState['abilities'], [curAction.value]: prevState['abilities'][curAction.value] - 1 } },
+    gameStatus: { ...prev, gameStatus: cur.value }, //not started | started | paused | finished
+    toggleGameStatus: { ...prev, gameStatus: prev['gameStatus'] === 'started' ? 'paused' : 'started' }, //not started | started | paused | finished
+    difficulty: { ...prev, difficulty: cur.value },
+    timer: { ...prev, timer: cur.value },
+    countTime: { ...prev, timer: addOneSecond(prev['timer']) },
+    history: { ...prev, history: cur.value },
+    flags: { ...prev, flags: cur.value },
+    addToHistory: { ...prev, history: { ...prev['history'], ...cur.value } },
+    addToFlags: { ...prev, flags: { ...prev['flags'], ...cur.value } },
+    map: { ...prev, map: cur.value },
+    firstClick: { ...prev, firstClick: cur.value },
+    gameOver: { ...prev, gameOver: cur.value },
+    abilities: { ...prev, abilities: cur.value },
+    useAbility: { ...prev, activeAbility: cur.value, abilities: { ...prev['abilities'], [cur.value]: prev['abilities'][cur.value] - 1 } },
     nullify: { ...defaultSettings },
-  }[curAction.switch];
+  }[cur.switch];
 };
 
 function App() {
