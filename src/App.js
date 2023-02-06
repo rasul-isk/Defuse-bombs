@@ -7,25 +7,10 @@ import Navigation from './scenes/Navigation';
 import Shop from './scenes/Shop';
 import { theme } from './theme';
 // import { Routes, Route } from 'react-router-dom';
+import { addOneSecond, bombCount } from './components/ProcessingMethods';
 import Data from './data/DummyData';
 import Scoreboard from './scenes/Scoreboard';
 import Winner from './scenes/Winner';
-
-const countValue = (bombs, xy) => {
-  let [x, y] = xy.split('-').map((el) => ~~el);
-  let possibilities = [`${x - 1}-${y}`, `${x}-${y - 1}`, `${x - 1}-${y - 1}`, `${x - 1}-${y + 1}`, `${x + 1}-${y}`, `${x}-${y + 1}`, `${x + 1}-${y + 1}`, `${x + 1}-${y - 1}`];
-  return possibilities.reduce((prev, cur) => prev + (bombs[cur] ? 1 : 0), 0).toString();
-};
-
-const addOneSecond = (prev) => {
-  let [minutes, seconds] = prev.split(':');
-  seconds++;
-  if (seconds === 60) {
-    minutes++;
-    seconds = 0;
-  }
-  return [('0' + minutes).slice(-2), ('0' + seconds).slice(-2)].join(':');
-};
 
 const defaultSettings = {
   gameStatus: 'not started',
@@ -43,6 +28,7 @@ const defaultSettings = {
     fortune: 0,
   },
   activeAbility: '',
+  cellsOnFocus: [],
 };
 
 const viewReducer = (prev, current) => {
@@ -69,7 +55,9 @@ const gameInfoReducer = (prev, cur) => {
     firstClick: { ...prev, firstClick: cur.value },
     gameOver: { ...prev, gameOver: cur.value },
     abilities: { ...prev, abilities: cur.value },
-    useAbility: { ...prev, activeAbility: cur.value, abilities: { ...prev['abilities'], [cur.value]: prev['abilities'][cur.value] - 1 } },
+    useAbility: { ...prev, activeAbility: '', cellsOnFocus: [], abilities: { ...prev['abilities'], [cur.value]: prev['abilities'][cur.value] - 1 } },
+    activeAbility: { ...prev, activeAbility: cur.value },
+    cellsOnFocus: { ...prev, cellsOnFocus: cur.value },
     nullify: { ...defaultSettings },
   }[cur.switch];
 };
@@ -103,7 +91,7 @@ function App() {
     for (let y = 1; y <= size; y++) {
       for (let x = 1; x <= size; x++) {
         if (!bombs[`${x}-${y}`]) {
-          restFields[`${x}-${y}`] = countValue(bombs, `${x}-${y}`);
+          restFields[`${x}-${y}`] = bombCount(bombs, `${x}-${y}`);
         }
       }
     }

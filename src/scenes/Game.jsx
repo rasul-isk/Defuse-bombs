@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react';
 import AbilityButton from '../components/AbilityButton';
 import Grid from '../components/Grid';
 import HeaderTitle from '../components/HeaderTitle';
+import { possibilities } from '../components/ProcessingMethods';
 import VerticalDivider from '../components/VerticalDivider';
 import { colors } from '../theme';
 
@@ -14,6 +15,7 @@ export const Game = ({ gameInfo, dispatchGame }) => {
   const [allZeroesOpen, setAllZeroesOpen] = useState(false);
   const [usedFortune] = useState(gameInfo.abilities.fortune);
   let mapSize = Object.entries(gameInfo.map).length;
+  let rowSize = Math.sqrt(mapSize);
   let bombs = Object.entries(gameInfo.map).filter((el) => el[1] === 'X').length;
 
   useEffect(() => {
@@ -25,28 +27,28 @@ export const Game = ({ gameInfo, dispatchGame }) => {
 
   useEffect(() => {
     //WIN SITUATION
-
-    if (!gameInfo.gameOver && mapSize === Object.entries(gameInfo.history).length + bombs) {
-      dispatchGame({ switch: 'gameStatus', value: 'finished' });
-    }
-  }, [gameInfo.gameOver, mapSize, gameInfo.history, bombs, dispatchGame]);
+    let nonBombCells = Object.keys(gameInfo.history).filter((el) => gameInfo.map[el] !== 'X').length;
+    const counter = !gameInfo.gameOver && mapSize === nonBombCells + bombs && setInterval(() => dispatchGame({ switch: 'gameStatus', value: 'finished' }), 3000);
+    return () => clearInterval(counter);
+  }, [gameInfo.gameOver, gameInfo.map, mapSize, gameInfo.history, bombs, dispatchGame]);
 
   useEffect(() => {
     //if all zeroes open, do not look for cells (with value 0) and their nearby cells that can be unhided
     if (!allZeroesOpen) {
       let totalZeroesOnMap = Object.entries(gameInfo.map).filter((el) => el[1] === '0').length;
-      let zeroesLeft = totalZeroesOnMap - Object.entries(gameInfo.map).filter((el) => el[1] === '0' && gameInfo.history[el[0]] === 'not hidden').length;
-
+      let notHiddenZeroes = Object.entries(gameInfo.map).filter((el) => el[1] === '0' && gameInfo.history[el[0]] === 'not hidden').length;
+      let zeroesLeft = totalZeroesOnMap - notHiddenZeroes;
+      let outOfMap = new RegExp(`(\\b0\\b)|(\\b${rowSize + 1}\\b)`);
+      // console.log('2-11'.match(outOfMap));
       if (zeroesLeft > 0) {
         let y = 1;
-        while (y <= mapSize) {
+        while (y <= rowSize) {
           let x = 1;
-          while (x <= mapSize) {
+          while (x <= rowSize) {
             if (gameInfo.history[`${x}-${y}`] === 'not hidden' && gameInfo.map[`${x}-${y}`] === '0') {
-              let possibilities = [`${x - 1}-${y}`, `${x}-${y - 1}`, `${x - 1}-${y - 1}`, `${x - 1}-${y + 1}`, `${x + 1}-${y}`, `${x}-${y + 1}`, `${x + 1}-${y + 1}`, `${x + 1}-${y - 1}`];
-              let zeroesArrToOpen = possibilities.filter((el) => gameInfo.map[el] === '0' && gameInfo.history[el] !== 'not hidden');
-              if (zeroesArrToOpen.length) {
-                let cellsAsObject = zeroesArrToOpen.reduce((acc, cur) => ({ ...acc, [cur]: 'not hidden' }), {});
+              let cellsToOpen = possibilities(`${x}-${y}`).filter((el) => !el.match(outOfMap) && gameInfo.history[el] !== 'not hidden');
+              if (cellsToOpen.length) {
+                let cellsAsObject = cellsToOpen.reduce((acc, cur) => ({ ...acc, [cur]: 'not hidden' }), {});
                 dispatchGame({ switch: 'addToHistory', value: cellsAsObject });
               }
             }
@@ -58,7 +60,7 @@ export const Game = ({ gameInfo, dispatchGame }) => {
         setAllZeroesOpen(true);
       }
     }
-  }, [gameInfo.map, gameInfo.history, allZeroesOpen, mapSize, dispatchGame]);
+  }, [gameInfo.map, gameInfo.history, rowSize, allZeroesOpen, mapSize, dispatchGame]);
 
   useEffect(() => {
     // Time counting + finishing game + finishing at 59:59 with "game over"
@@ -99,7 +101,7 @@ export const Game = ({ gameInfo, dispatchGame }) => {
                 boolean={!gameInfo.gameOver && gameInfo.abilities.radar > 0 && !gameInfo.activeAbility}
                 dispatchGame={dispatchGame}
                 Icon={RadarIcon}
-                state={{ switch: 'useAbility', value: 'radar' }}
+                state={{ switch: 'activeAbility', value: 'radar' }}
               />
             </Box>
             <Box sx={{ display: 'inline-flex', alignItems: 'center', pt: '5px' }}>
@@ -109,7 +111,7 @@ export const Game = ({ gameInfo, dispatchGame }) => {
                 boolean={!gameInfo.gameOver && gameInfo.abilities.kamikaze > 0 && !gameInfo.activeAbility}
                 dispatchGame={dispatchGame}
                 Icon={AirplaneTicketIcon}
-                state={{ switch: 'useAbility', value: 'kamikaze' }}
+                state={{ switch: 'activeAbility', value: 'kamikaze' }}
               />
             </Box>
             <Box sx={{ display: 'inline-flex', alignItems: 'center', pt: '5px' }}>
