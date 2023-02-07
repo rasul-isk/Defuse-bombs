@@ -24,3 +24,9 @@ export const horizontalLine = (xy, rowSize) => {
   for (x = 0; x <= rowSize; x++) possibilities.push(`${x}-${y}`);
   return possibilities;
 };
+
+export const timeConverter = (prev, cur) => {
+  prev = prev.split(':');
+  cur = cur.split(':');
+  return ~~prev[0] * 60 + ~~prev[1] - (~~cur[0] * 60 + ~~cur[1]);
+};

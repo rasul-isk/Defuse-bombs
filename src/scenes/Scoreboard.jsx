@@ -1,27 +1,48 @@
-import { Box, colors, Typography } from '@mui/material';
-import React from 'react';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { Box, colors } from '@mui/material';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import { useState } from 'react';
+import HeaderTitle from '../components/HeaderTitle';
 
+const columns = [
+  { field: 'name', headerName: 'Full Name', flex: 1 },
+  { field: 'timer', headerName: 'Timer', flex: 0.5 },
+  { field: 'date', headerName: 'Date', flex: 1 }, //, cellClassName: 'name-column--cell'
+];
 const Scoreboard = ({ usersData }) => {
-  const timeConverter = (prev, cur) => {
-    prev = prev.split(':');
-    cur = cur.split(':');
-    return ~~prev[0] * 60 + ~~prev[1] - (~~cur[0] * 60 + ~~cur[1]);
+  let [mode, setMode] = useState('Newbie');
+
+  const toggleRight = () => {
+    setMode((prev) => ({ Newbie: 'Skilled', Skilled: 'Crazy', Crazy: 'Newbie' }[prev]));
   };
-  usersData = usersData['Newbie'];
-  // Modify it once you started to develop dashboard.
-  // Dashboard should contain carousel of scores from 3 modes(Newbie, Skilled, Crazy)
-  const DataParse = Object.keys(usersData)
-    .sort((prev, cur) => timeConverter(usersData[prev], usersData[cur]))
-    .map((el) => (
-      <Box key={el}>
-        <Typography variant="h3">
-          {el} | {usersData[el]}
-        </Typography>
-      </Box>
-    ));
+  const toggleLeft = () => {
+    setMode((prev) => ({ Skilled: 'Newbie', Crazy: 'Skilled', Newbie: 'Crazy' }[prev]));
+  };
+
   return (
-    <Box className="container-item" bgcolor={colors.red[500]} display="block" width="auto">
-      {DataParse}
+    <Box className="container-item" sx={{}} bgcolor={colors.red[500]} display="block" width="auto">
+      {/* {DataParse} */}
+      <HeaderTitle title={mode} />
+      <Box display="inline-flex" alignItems="center" justifyContent={'space-between'}>
+        <ChevronLeftIcon fontSize="large" sx={{ mr: '12px' }} onClick={toggleLeft} />
+
+        <Box
+          height="50vh"
+          sx={{
+            '& .MuiDataGrid-columnHeaderTitle': {
+              fontSize: '14px',
+            },
+            '& .MuiDataGrid-cell': {
+              fontFamily: 'Sourcse Sans Pro, sans-serif',
+              fontSize: '16px',
+            },
+          }}
+        >
+          <DataGrid rows={usersData[mode]} columns={columns} components={{ Toolbar: GridToolbar }} />
+        </Box>
+        <ChevronRightIcon fontSize="large" sx={{ ml: '12px' }} onClick={toggleRight} />
+      </Box>
     </Box>
   );
 };

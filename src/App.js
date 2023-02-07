@@ -8,7 +8,7 @@ import Shop from './scenes/Shop';
 import { theme } from './theme';
 // import { Routes, Route } from 'react-router-dom';
 import { addOneSecond, bombCount } from './components/ProcessingMethods';
-import Data from './data/DummyData';
+import dummyData from './data/DummyData';
 import Scoreboard from './scenes/Scoreboard';
 import Winner from './scenes/Winner';
 
@@ -63,15 +63,10 @@ const gameInfoReducer = (prev, cur) => {
 };
 
 function App() {
-  const [commonUI, dispatchUI] = useReducer(viewReducer, {
-    volume: false,
-    information: false,
-    scoreboard: false,
-    view: '',
-  });
+  const [commonUI, dispatchUI] = useReducer(viewReducer, { volume: false, information: false, scoreboard: false, view: '' });
 
   const [gameInfo, dispatchGame] = useReducer(gameInfoReducer, defaultSettings);
-  const [usersScores, setUsersScores] = useState(Data); //MODIFY IT TO GET RESULTS FROM SCOREBOARD
+  const [usersScores, setUsersScores] = useState(dummyData()); //MODIFY IT TO GET RESULTS FROM SCOREBOARD
 
   const musicURL = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3';
   const [audio] = useState(new Audio(musicURL));
@@ -133,20 +128,6 @@ function App() {
     dispatchGame({ switch: 'toggleGameStatus' });
     dispatchUI({ switch: 'nullify' });
   };
-
-  /*
-  When u had multiple states   
-  const toggleVolume = () => setVolume((prev) => !prev);
-  const toggleScoreboard = () => {
-    if (gameStatus === 'started') setGameStatus('paused');
-    setInformation(false);
-    setScoreboard((prev) => !prev);
-  };
-  const toggleInformation = () => {
-    if (gameStatus === 'started') setGameStatus('paused');
-    setScoreboard(false);
-    setInformation((prev) => !prev);
-  }; */
 
   const restart = () => {
     dispatchUI({ switch: 'nullify' });
