@@ -1,8 +1,8 @@
-import FlagIcon from '@mui/icons-material/Flag';
 import { Box } from '@mui/material';
 import React, { useMemo } from 'react';
-import BombIcon from '../pics/bomb.png';
+
 import { colors } from '../theme';
+import { allStyles, Bomb, Flag } from './GridStyle';
 import { horizontalLine, possibilities } from './ProcessingMethods';
 
 function MouseOver(xy, dispatchGame, activeAbility, rowSize) {
@@ -10,27 +10,16 @@ function MouseOver(xy, dispatchGame, activeAbility, rowSize) {
   activeAbility === 'kamikaze' && dispatchGame({ switch: 'cellsOnFocus', value: [xy, ...horizontalLine(xy, rowSize)] });
 }
 
-const generalStyle = { display: 'flex', justifyContent: 'center', alignItems: 'center' };
-const hiddenCell = { ...generalStyle, background: colors.black[300], border: `1px solid ${colors.teal[500]}` };
-const focusedCell = { background: 'red', cursor: 'crosshair' };
-const openedCell = { ...generalStyle, background: colors.black[100], border: `1px solid ${colors.teal[300]}`, color: colors.black[500] };
-const explodedCell = { ...generalStyle, background: colors.red[500], border: `1px solid ${colors.black[500]}` };
-const Bomb = <img src={BombIcon} style={{ maxWidth: '90%', maxHeight: '90%' }} alt="bomb" />;
-const flagStyle = { maxWidth: '90%', maxHeight: '90%', color: colors.red[500] };
-
 const Cell = ({ squareSize, xy, gameInfo, dispatchGame }) => {
   const size = { height: `${squareSize}px`, width: `${squareSize}px` };
   let rowSize = Math.sqrt(Object.entries(gameInfo.map).length);
   let state = gameInfo.history[xy] || 'hidden';
   let flag = gameInfo.flags[xy] || false;
   let value = gameInfo.map[xy];
-  // console.log(xy + ' - ' + gameInfo.cellsOnFocus[xy]);
   let emptyHistory = Object.entries(gameInfo.history).length === 0;
-  let stateStyle = {
-    'game over': { ...explodedCell },
-    hidden: { ...hiddenCell, ...(gameInfo.cellsOnFocus.includes(xy) ? focusedCell : {}) },
-    'not hidden': { ...openedCell },
-  }[state];
+  let stateStyle = allStyles(gameInfo.cellsOnFocus.includes(xy))[state];
+
+  if (state === 'not hidden' && value === 'X' && !gameInfo.gameOver) stateStyle['background'] = colors.teal[700];
 
   const actionType = () => {
     if (gameInfo.activeAbility) {
@@ -45,9 +34,6 @@ const Cell = ({ squareSize, xy, gameInfo, dispatchGame }) => {
     }
   };
 
-  // console.log(actionType);
-  if (state === 'not hidden' && value === 'X' && !gameInfo.gameOver) stateStyle['background'] = colors.teal[700];
-
   return (
     <Box
       onClick={() => state === 'hidden' && actionType()}
@@ -61,10 +47,9 @@ const Cell = ({ squareSize, xy, gameInfo, dispatchGame }) => {
       onMouseOver={state === 'hidden' && gameInfo.activeAbility ? () => MouseOver(xy, dispatchGame, gameInfo.activeAbility, rowSize) : () => {}}
     >
       {state === 'game over' && (value === 'X' ? Bomb : value)}
-      {/* {state === 'not hidden' && (value === 'X' ? Bomb : value !== '0' && value)} */}
-      {/* cheat for seeing cells below*/}
-      {state === 'hidden' && !flag && (value === 'X' ? Bomb : value !== '0' && value)}
-      {state === 'hidden' && flag && <FlagIcon sx={{ ...flagStyle, ...(gameInfo.cellsOnFocus.includes(xy) ? { color: 'black' } : {}) }} />}
+      {/* visible cells below: hidden | not visible: not hidden */}
+      {state === 'not hidden' && (value === 'X' ? Bomb : value !== '0' && value)}
+      {state === 'hidden' && flag && Flag(gameInfo.cellsOnFocus.includes(xy))}
     </Box>
   );
 };
@@ -87,7 +72,6 @@ const Action = (dispatchGame, xy, value, fortune, emptyHistory) => {
 };
 
 const Grid = ({ gameInfo, dispatchGame, width }) => {
-  // console.log('now I know, when I have active ability. current one: ' + gameInfo.activeAbility); //STOPPED HERE
   let squareSize = width / { Newbie: 10, Skilled: 15, Crazy: 20 }[gameInfo.difficulty];
   let size = { Newbie: 10, Skilled: 15, Crazy: 20 }[gameInfo.difficulty];
   let table = useMemo(() => renderOfMatrix(gameInfo, dispatchGame, size, squareSize), [gameInfo, dispatchGame, size, squareSize]);

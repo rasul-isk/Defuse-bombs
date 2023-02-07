@@ -39,7 +39,7 @@ export const Game = ({ gameInfo, dispatchGame }) => {
       let notHiddenZeroes = Object.entries(gameInfo.map).filter((el) => el[1] === '0' && gameInfo.history[el[0]] === 'not hidden').length;
       let zeroesLeft = totalZeroesOnMap - notHiddenZeroes;
       let outOfMap = new RegExp(`(\\b0\\b)|(\\b${rowSize + 1}\\b)`);
-      // console.log('2-11'.match(outOfMap));
+
       if (zeroesLeft > 0) {
         let y = 1;
         while (y <= rowSize) {
