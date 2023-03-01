@@ -1,0 +1,42 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Source+Sans+Pro:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap');
+
+html,
+body,
+#root,
+.app {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+  font-family: 'Press Start 2P', 'cursive';
+  /* font-family: 'Source Sans Pro', sans-serif; */
+}
+
+.additional-content {
+  height: 100%;
+  width: 100%;
+  font-family: 'Source Sans Pro', sans-serif;
+}
+
+.header {
+  border-radius: 35% !important;
+  padding: 60px !important;
+  display: flex !important;
+}
+.container-item {
+  align-items: center;
+  display: block;
+  padding: 50px;
+  width: 40%;
+  height: fit-content;
+  margin: 10px;
+  border-radius: 25%;
+}
+
+.main-button {
+  color: #ffb41f !important;
+}
+
