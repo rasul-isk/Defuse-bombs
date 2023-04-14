@@ -1,13 +1,18 @@
 import { Box, colors } from '@mui/material';
+import axios from 'axios';
 import React, { useState } from 'react';
 import HeaderTitle from '../components/HeaderTitle';
-
-const Winner = ({ insertName, showScoreBoard }) => {
+import { stringToSeconds } from '../components/ProcessingMethods';
+const Winner = ({ insertName, showScoreBoard, gameInfo }) => {
   const [name, setName] = useState('');
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    insertName(name);
+
+    let submitObject = { fullname: name, difficulty: gameInfo.difficulty, score: stringToSeconds(gameInfo.timer), date: gameInfo.winTime };
+
+    axios.post('http://localhost:5000/admin/scores/add', submitObject).catch((err) => console.log(err));
+    // insertName(name); #REMOVE
     showScoreBoard();
   };
   const handleChange = (event) => {

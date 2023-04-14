@@ -28,7 +28,13 @@ export const Game = ({ gameInfo, dispatchGame }) => {
   useEffect(() => {
     //WIN SITUATION
     let nonBombCells = Object.keys(gameInfo.history).filter((el) => gameInfo.map[el] !== 'X').length;
-    const counter = !gameInfo.gameOver && mapSize === nonBombCells + bombs && setInterval(() => dispatchGame({ switch: 'gameStatus', value: 'finished' }), 3000);
+    const counter =
+      !gameInfo.gameOver &&
+      mapSize === (nonBombCells + bombs) &&
+      setInterval(() => {
+        dispatchGame({ switch: 'winTime', value: Date.now() });
+        dispatchGame({ switch: 'gameStatus', value: 'finished' });
+      }, 2000);
     return () => clearInterval(counter);
   }, [gameInfo.gameOver, gameInfo.map, mapSize, gameInfo.history, bombs, dispatchGame]);
 

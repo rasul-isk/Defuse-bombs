@@ -48,7 +48,7 @@ const Cell = ({ squareSize, xy, gameInfo, dispatchGame }) => {
     >
       {state === 'game over' && (value === 'X' ? Bomb : value)}
       {/* visible cells below: hidden | not visible: not hidden */}
-      {state === 'not hidden' && (value === 'X' ? Bomb : value !== '0' && value)}
+      {state === 'hidden' && (value === 'X' ? Bomb : value !== '0' && value)}
       {state === 'hidden' && flag && Flag(gameInfo.cellsOnFocus.includes(xy))}
     </Box>
   );

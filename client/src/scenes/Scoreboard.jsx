@@ -2,7 +2,8 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Box, colors } from '@mui/material';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
-import { useState } from 'react';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 import HeaderTitle from '../components/HeaderTitle';
 
 const columns = [
@@ -10,8 +11,33 @@ const columns = [
   { field: 'timer', headerName: 'Timer', flex: 0.5 },
   { field: 'date', headerName: 'Date', flex: 1 }, //, cellClassName: 'name-column--cell'
 ];
-const Scoreboard = ({ usersData }) => {
+const Scoreboard = () => {
   let [mode, setMode] = useState('Newbie');
+  let [data, setData] = useState([]);
+  let [displayData, setDisplayData] = useState([]);
+  // id: 1,
+  // name: 'John Doe',
+  // timer: '08:23',
+  // date: '2022-05-01',
+  useEffect(() => {
+    axios
+      .get('http://localhost:5000/scores/show')
+      .then((res) => {
+        let data = res.data;
+        data.sort((prev, cur) => cur.score - prev.score);
+        for (let itr = 0; itr < data.length; itr++) {
+          data[itr] = { id: data[itr]._id, name: data[itr].fullname, timer: data[itr].score, date: data[itr].date, difficulty: data[itr].difficulty };
+        }
+        console.log(data);
+        setData(data);
+      })
+      .catch((err) => console.log(err));
+  }, []);
+
+  useEffect(() => {
+    setDisplayData(data.filter((el) => el.difficulty === mode));
+    // console.log('data' + Object.entries(displayData));
+  }, [mode, data]);
 
   const toggleRight = () => {
     setMode((prev) => ({ Newbie: 'Skilled', Skilled: 'Crazy', Crazy: 'Newbie' }[prev]));
@@ -39,7 +65,8 @@ const Scoreboard = ({ usersData }) => {
             },
           }}
         >
-          <DataGrid rows={usersData[mode]} columns={columns} components={{ Toolbar: GridToolbar }} />
+          {console.log(displayData)}
+          {displayData && <DataGrid rows={displayData} columns={columns} components={{ Toolbar: GridToolbar }} />}
         </Box>
         <ChevronRightIcon fontSize="large" sx={{ ml: '12px' }} onClick={toggleRight} />
       </Box>

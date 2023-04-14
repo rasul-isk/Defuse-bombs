@@ -16,6 +16,7 @@ const defaultSettings = {
   gameStatus: 'not started',
   difficulty: 'not chosen',
   timer: '00:00',
+  winTime:'',
   history: {},
   map: {},
   flags: {},
@@ -58,6 +59,7 @@ const gameInfoReducer = (prev, cur) => {
     useAbility: { ...prev, activeAbility: '', cellsOnFocus: [], abilities: { ...prev['abilities'], [cur.value]: prev['abilities'][cur.value] - 1 } },
     activeAbility: { ...prev, activeAbility: cur.value },
     cellsOnFocus: { ...prev, cellsOnFocus: cur.value },
+    winTime: { ...prev, winTime: cur.value },
     nullify: { ...defaultSettings },
   }[cur.switch];
 };
@@ -66,7 +68,7 @@ function App() {
   const [commonUI, dispatchUI] = useReducer(viewReducer, { volume: false, information: false, scoreboard: false, view: '' });
 
   const [gameInfo, dispatchGame] = useReducer(gameInfoReducer, defaultSettings);
-  const [usersScores, setUsersScores] = useState(dummyData()); //MODIFY IT TO GET RESULTS FROM SCOREBOARD
+  // const [usersScores, setUsersScores] = useState(dummyData()); //MODIFY IT TO GET RESULTS FROM SCOREBOARD #remove
 
   const musicURL = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3';
   const [audio] = useState(new Audio(musicURL));
@@ -142,9 +144,9 @@ function App() {
     dispatchUI({ switch: 'scoreboard' });
   };
 
-  const insertName = (name) => {
-    setUsersScores((prev) => ({ ...prev, [gameInfo.difficulty]: { ...prev[gameInfo.difficulty], [name]: gameInfo.timer } }));
-  };
+  // const insertName = (name) => { #REMOVE
+  //   setUsersScores((prev) => ({ ...prev, [gameInfo.difficulty]: { ...prev[gameInfo.difficulty], [name]: gameInfo.timer } }));
+  // };
 
   return (
     <ThemeProvider theme={theme}>
@@ -152,7 +154,7 @@ function App() {
       <div className="app">
         <Navigation commonUI={commonUI} dispatchUI={dispatchUI} gameInfo={gameInfo} restart={restart} togglePlay={togglePlay} />
         {commonUI.information && <InfoBox />}
-        {commonUI.scoreboard && <Scoreboard usersData={usersScores} />}
+        {commonUI.scoreboard && <Scoreboard />}
         {commonUI.view === '' && gameInfo.gameStatus === 'started' && gameInfo.difficulty === 'not chosen' && <Difficulty dispatchGame={dispatchGame} />}
         {commonUI.view === '' && gameInfo.gameStatus === 'started' && gameInfo.difficulty !== 'not chosen' && gameInfo.difficulty !== 'Crazy' && gameInfo.abilities.status === 'not chosen' && (
           <Shop captureAbilities={captureAbilities} difficulty={gameInfo.difficulty} />
@@ -160,7 +162,7 @@ function App() {
         {commonUI.view === '' && gameInfo.gameStatus !== 'paused' && gameInfo.abilities.status === 'chosen' && (gameInfo.gameOver === true || gameInfo.gameStatus !== 'finished') && (
           <Game gameInfo={gameInfo} dispatchGame={dispatchGame} />
         )}
-        {commonUI.view === '' && gameInfo.gameOver === false && gameInfo.gameStatus === 'finished' && <Winner insertName={insertName} showScoreBoard={showScoreBoard} />}
+        {commonUI.view === '' && gameInfo.gameOver === false && gameInfo.gameStatus === 'finished' && <Winner showScoreBoard={showScoreBoard} gameInfo={gameInfo} />}
       </div>
     </ThemeProvider>
   );

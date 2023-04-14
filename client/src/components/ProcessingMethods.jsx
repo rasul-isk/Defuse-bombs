@@ -30,3 +30,7 @@ export const timeConverter = (prev, cur) => {
   cur = cur.split(':');
   return ~~prev[0] * 60 + ~~prev[1] - (~~cur[0] * 60 + ~~cur[1]);
 };
+export const stringToSeconds = (timer) => {
+  const time = timer.split(':');
+  return ~~time[0] * 60 + ~~time[1];
+};
